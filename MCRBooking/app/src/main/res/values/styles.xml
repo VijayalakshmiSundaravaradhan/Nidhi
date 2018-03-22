@@ -1,0 +1,27 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- Customize your theme here. -->
+        <!--<item name="colorPrimary">@color/colorPrimary</item>-->
+        <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+        <!--<item name="colorAccent">@color/colorAccent</item>-->
+    </style>
+
+    <style name="Theme.Custom" parent="@android:style/Theme">
+        <item name="android:calendarViewStyle">@style/Widget.CalendarView.Custom</item>
+    </style>
+
+    <style name="Widget.CalendarView.Custom" parent="android:Widget.CalendarView">
+    <item name="android:focusedMonthDateColor">@color/colorGreen</item>
+    <item name="android:unfocusedMonthDateColor">@color/colorRed</item>
+    <!--<item name="android:weekNumberColor">@color/colorWhite</item>-->
+    <!--<item name="android:dayOfWeekBackground">@color/colorRed</item>-->
+    <!--<item name="android:weekSeparatorLineColor">@color/colorBlue</item>-->
+    <item name="android:dateTextAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    <item name="android:selectedWeekBackgroundColor">@color/colorRedTranslucent</item>
+    <item name="android:selectedDateVerticalBar">@drawable/date_highlight</item>
+    <!--<item name="android:dayOfWeekTextAppearance">@style/TextAppearance.AppCompat.Title</item>-->
+    <item name="android:weekDayTextAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    </style>
+</resources>

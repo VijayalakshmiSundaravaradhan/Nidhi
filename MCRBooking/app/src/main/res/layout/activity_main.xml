@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBlack"
+    tools:context="kiosk.android.econ.mcrbooking.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="4"
+        android:orientation="horizontal">
+
+        <!--<CalendarView-->
+            <!--android:id="@+id/calendarMain"-->
+            <!--android:layout_width="900dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--android:showWeekNumber="false"-->
+            <!--android:theme="@style/Theme.Custom" />-->
+
+
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/calendarView"
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="match_parent"
+            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Headline"
+            app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Headline"
+            app:mcv_tileWidth="100dp"
+            app:mcv_titleAnimationOrientation="horizontal"
+            app:mcv_calendarMode="month"
+            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Headline"
+            app:mcv_selectionColor="@color/colorGreen"
+            app:mcv_showOtherDates="all" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:weightSum="8"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_centerInParent="true"
+                android:orientation="vertical">
+
+            <Button
+                android:id="@+id/addEvent"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/add_event"
+                android:textColor="@color/colorGreen"
+                android:textSize="20dp"
+                android:textStyle="normal"
+                android:background="@color/colorButtons"
+                android:onClick="gotoformActivity" />
+
+            </LinearLayout>
+
+            <ExpandableListView
+                android:id="@+id/events"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="7" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
