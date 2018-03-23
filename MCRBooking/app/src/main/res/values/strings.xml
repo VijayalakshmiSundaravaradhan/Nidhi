@@ -14,11 +14,6 @@
     <string name="cancel">Cancel</string>
     <string-array name="confRooms">
         <item>MCR</item>
-        <item>Camera Conference Room</item>
-        <item>Side Conference Room</item>
-        <item>1 Conference Room</item>
-        <item>2 Conference Room</item>
-        <item>3 Conference Room</item>
-        <item>4 Conference Room</item>
+        <item>CCR</item>
     </string-array>
 </resources>

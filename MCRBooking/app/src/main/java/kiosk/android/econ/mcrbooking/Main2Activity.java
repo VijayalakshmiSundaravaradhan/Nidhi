@@ -4,9 +4,9 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -14,7 +14,7 @@ import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-//import com.econ.kannan.DBReqHandler;
+import com.econ.kannan.DBReqHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,7 +27,6 @@ public class Main2Activity extends AppCompatActivity {
     String currentDateString;
     TextView dateText;
     TextView selectedDateText;
-    //DBReqHandler dbReqHandler;
 
     NumberPicker s_hours;
     NumberPicker s_minutes;
@@ -44,6 +43,8 @@ public class Main2Activity extends AppCompatActivity {
     int selectedYear;
     int selectedMonth;
     int selectedDay;
+
+    String selectedMonthString;
 
     String selectedRoom;
     String Person;
@@ -67,6 +68,7 @@ public class Main2Activity extends AppCompatActivity {
 
     AlertDialog.Builder builder;
     AlertDialog cancelDialog;
+    DBReqHandler dbReqHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +90,40 @@ public class Main2Activity extends AppCompatActivity {
 
         selectedYear = getIntent().getIntExtra("selectedYear",0);
         selectedMonth = getIntent().getIntExtra("selectedMonth",0);
+        selectedMonthString = getIntent().getStringExtra("selectedMonthString");
         selectedDay = getIntent().getIntExtra("selectedDay",0);
-        //dbReqHandler = getIntent().getIntExtra("dbReqHandler",0);
+
+
+
+        dbReqHandler = new DBReqHandler(getApplicationContext(), new DBReqHandler.IDBReqHandler() {
+            @Override
+            public void testCallback(String ans)
+            {
+                Log.d("On callback", "-----");
+                JSONObject response;
+                try {
+                    response = new JSONObject(ans);
+
+
+                    if(response.optString("msg_type").equals(bookResponseMessageType)) {
+                        bookRoomResponseString = ans;
+                        //bookRoomResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
+                        OnBookingRoom();
+                    }
+
+                    if(response.optString("msg_type").equals(cancelResponseMessageType)) {
+                        cancelResponseString = ans;
+                        //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
+                        OnCancelling();
+                    }
+
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+                Toast.makeText(getApplicationContext(), "SM IS" + ans, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         builder = new AlertDialog.Builder(this);
         builder.setTitle("Cancel");
@@ -120,17 +154,17 @@ public class Main2Activity extends AppCompatActivity {
                     cancelRequest = new JSONObject();
 
                     try {
+                        cancelRequest.put("Client_ID","000000");
                         cancelRequest.put("msg_type", "RQ_CL");
                         cancelRequest.put("Book_id", bookingID);
                         cancelRequest.put("user", Person);
+
+                        dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString(10));
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    //Message msg = new Message();
-                    //msg.obj = cancelRequest;
-                    //DBReqHandler.sendMessage(msg);
-                    //dbReqHandler.dbRequest(dbReqHandler.MSG_ID_CANCEL,bookRequest.toString());
                 }
 
             }
@@ -179,44 +213,21 @@ public class Main2Activity extends AppCompatActivity {
         s_minutes.setMinValue(0);
         s_minutes.setMaxValue(59);
 
+        selectedSHour = startTimes[s_hours.getValue()];
+        selectedSMinute = String.valueOf(s_minutes.getValue());
+        setEndTime();
+
+
         updateHours();
         updateMinutes();
 
-        /*
-        dbReqHandler = new DBReqHandler(getApplicationContext(), new DBReqHandler.IDBReqHandler() {
-            @Override
-            public void testCallback(String ans)
-            {
-                JSONObject response;
-                try {
-                    response = new JSONObject(ans);
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-
-                if(response.optString("msg_type").equals(bookResponseMessageType)) {
-                    bookRoomResponseString = ans;
-                    bookRoomResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
-                    OnBookingRoom();
-                }
-
-                if(response.optString("msg_type").equals(cancelResponseMessageType)) {
-                    cancelResponseString = ans;
-                    cancelResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
-                    OnCancelling();
-                }
-
-                Toast.makeText(Main2Activity.this, "SM IS" + ans, Toast.LENGTH_SHORT).show();
-            }
-        });
-        */
 
         s_hours.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int oldValue, int newValue) {
                 selectedSHour = startTimes[s_hours.getValue()];
                 updateHours();
-                updateMinutes();
+                //updateMinutes();
             }
         });
 
@@ -224,16 +235,16 @@ public class Main2Activity extends AppCompatActivity {
         s_minutes.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int oldValue, int newValue) {
-                selectedSMinute = String.valueOf(newValue * 15);
+                selectedSMinute = String.valueOf(newValue);
                 updateHours();
-                updateMinutes();
+                //updateMinutes();
             }
         });
 
         e_hours.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int oldValue, int newValue) {
-                selectedEHour = String.valueOf(newValue);
+
                 updateMinutes();
             }
         });
@@ -241,7 +252,7 @@ public class Main2Activity extends AppCompatActivity {
         e_minutes.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker numberPicker, int oldValue, int newValue) {
-                selectedEMinute = String.valueOf(newValue * 15);
+                selectedEMinute = String.valueOf(newValue);
             }
         });
 
@@ -256,39 +267,61 @@ public class Main2Activity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Please enter your good name" , Toast.LENGTH_SHORT).show();
         else
         {
-            Toast.makeText(getApplicationContext(),"{\"msg_type\":\"RQ_BK_CNF\",\"year\":\""+selectedYear+"\",\"month\":\"" + selectedMonth+"\",\"day\":\""+selectedDay+"\",\"person\":\""+Person+"\",\"room\":\""+selectedRoom+"\"}",Toast.LENGTH_SHORT).show();
-
-            //bookRoom();
+            //Toast.makeText(getApplicationContext(),"{\"msg_type\":\"RQ_BK_CNF\",\"year\":\""+selectedYear+"\",\"month\":\"" + selectedMonth+"\",\"day\":\""+selectedDay+"\",\"person\":\""+Person+"\",\"room\":\""+selectedRoom+"\"}",Toast.LENGTH_SHORT).show();
 
             bookRequest = new JSONObject();
 
             try {
                 bookRequest.put("msg_type", "RQ_BK");
+                bookRequest.put("Client_ID", "000000");
                 bookRequest.put("year", selectedYear);
-                bookRequest.put("month", selectedMonth);
+                bookRequest.put("month", selectedMonthString);
                 bookRequest.put("day", selectedDay);
                 bookRequest.put("room", selectedRoom);
                 bookRequest.put("ST", selectedSHour+"."+selectedSMinute);
                 bookRequest.put("ET", selectedEHour+"."+selectedEMinute);
                 bookRequest.put("user", Person);
+                dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString(10));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            //dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString());
+
         }
+    }
+
+    private void setEndTime() {
+        int totalMinutes = (s_minutes.getValue() + e_minutes.getValue());
+        int hrs = totalMinutes % 60;
+        int minutes = totalMinutes - (hrs * 60);
+        selectedEHour = String.valueOf(e_hours.getValue() + Integer.parseInt(startTimes[s_hours.getValue()]) + hrs);
+        selectedEMinute = String.valueOf(minutes);
     }
 
     public void OnBookingRoom()
     {
+        try {
+            JSONObject bookingResponse = new JSONObject(bookRoomResponseString);
+
+            Log.d("============",bookRoomResponseString);
+            if(bookingResponse.optString("msg_type").equals(bookResponseMessageType) && bookingResponse.optString("result").equals("success")) {
+                Toast.makeText(getApplicationContext(), "Booking Successful" , Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Booking Failed" , Toast.LENGTH_SHORT).show();
+            }
+        }catch (JSONException e){
+            Log.d("---------------------","=============");
+            e.printStackTrace();
+        }
 
     }
 
     public void cancel(View v)
     {
-        cancelDialog.show();
+        Toast.makeText(getApplicationContext(),"You have no rights to cancel any events. Sorry!",Toast.LENGTH_SHORT).show();
 
-
+        //cancelDialog.show();
 
     }
 
@@ -328,6 +361,8 @@ public class Main2Activity extends AppCompatActivity {
             e_minutes.setMinValue(0);
             e_minutes.setMaxValue(0);
         }
+
+        setEndTime();
     }
 
 }

@@ -1,10 +1,11 @@
 package kiosk.android.econ.mcrbooking;
 
-import android.app.ActivityManager;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.Message;
+
+
+import android.icu.text.SimpleDateFormat;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 
-import android.widget.CalendarView;
+import com.econ.kannan.DBReqHandler;
 import android.widget.ExpandableListView;
 
 import android.widget.SimpleExpandableListAdapter;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -33,11 +35,12 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
-//import com.econ.kannan.DBReqHandler;
 
 public class MainActivity extends AppCompatActivity {
 
     MaterialCalendarView widget;
+
+    Activity mActivity;
 
     ExpandableListView eventsList;
     SimpleExpandableListAdapter eventsAdapter;
@@ -45,24 +48,22 @@ public class MainActivity extends AppCompatActivity {
     int height;
     int width;
 
-    //private String groupItems[] = {"Animals", "Birds"};
-    //private String[][] childItems = {{"Dog", "Cat", "Tiger"}, {"Crow", "Sparrow"}};
-
     private String[][] bookingDetails;
 
     private static final String NAME = "NAME";
+    public static final String[] months = new String[]{"jan", "feb", "mar", "apr", "jun",
+            "jul", "aug", "sep", "oct", "nov", "dec"};
 
     int selectedYear;
     int selectedMonth;
     int selectedDay;
 
-    int monthViewed;
-    //CalendarView calendarMain;
+    String selectedMonthString;
 
-//    SimpleDateFormat sdf;
+    int monthViewed;
+
 
     JSONObject monthRequest;
-    JSONObject monthResponse;
     String monthResponseString;
     String monthRequestMessageType;
     String monthResponseMessageType;
@@ -74,23 +75,22 @@ public class MainActivity extends AppCompatActivity {
     int currentDay;
 
     HashSet<CalendarDay> datesHighlighted;
-//    String selectedDate;
 
     JSONObject dayRequest;
-    JSONObject dayResponse;
     String dayResponseString;
     String dayRequestMessageType;
     String dayResponseMessageType;
     JSONObject bookings;
     JSONArray roomsBooked;
-    String[] roomNames = new String[6];
 
-    //subscriptions mSubscription;
+    final int noOfRooms = 2;
+
+    String[] roomNames = new String[noOfRooms];
 
 
-    //DBReqHandler dbReqHandler;
+    DBReqHandler dbReqHandler;
 
-    int t;
+
 
     public void daySubscribe() {
 
@@ -98,15 +98,18 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             dayRequest.put("Client_ID","000000");
-            dayRequest.put("msg_type", dayResponseMessageType);
+            dayRequest.put("msg_type", dayRequestMessageType);
             dayRequest.put("year", selectedYear);
-            dayRequest.put("month", selectedMonth);
+            dayRequest.put("month", selectedMonthString);
             dayRequest.put("day", selectedDay);
+
+            //Toast.makeText(getApplicationContext(), dayRequest.toString(10), Toast.LENGTH_SHORT).show();
+
+            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_PARSE_DATE,dayRequest.toString(10));
+
         }catch (JSONException e){
             e.printStackTrace();
         }
-
-        //dbReqHandler2.dbRequest(dbReqHandler2.MSG_ID_PARSE_DATE,dayRequest.toString());
 
 
         }
@@ -117,28 +120,29 @@ public class MainActivity extends AppCompatActivity {
             int[] bookingsInEachRoom;
             String[] roomsActuallyBooked;
 
-            bookingsInEachRoom = new int[6];
+            //bookingsInEachRoom = new int[noOfRooms];
+
+            int t;
 
             try {
-            dayResponse = new JSONObject(dayResponseString);
-
-            if(dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("ok")) {
-
-                bookings = dayResponse.getJSONObject("bookings");
-                Log.d("No.of bookings : ", String.valueOf(bookings.length()));
+                JSONObject dayResponse = new JSONObject(dayResponseString);
+                Log.d("No.of bookings : ", "On day sub" + dayResponse.optString("Client_ID"));
 
 
-//                for (int a = 0; a < bookings.length(); a++)
-//                    for (int b = 0; b < 10; b++)
-//                        bookingDetails[a][b] = "0";
+                if (dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("success")) {
 
+                    bookings = dayResponse.getJSONObject("bookings");
+                    Log.d("No.of bookings : ", String.valueOf(bookings.length()));
 
-                t = 0;
-                bookingsInEachRoom = new int[bookings.length()];
-                roomsActuallyBooked = new String[bookings.length()];
+                    if (bookings.length() <= 0)
+                        return;
+
+                    t = 0;
+                    bookingsInEachRoom = new int[bookings.length()];
+                    roomsActuallyBooked = new String[bookings.length()];
 
                     for (int k = 0; k < roomNames.length; k++) {
-                        if(bookings.has(roomNames[k])) {
+                        if (bookings.has(roomNames[k])) {
                             roomsBooked = bookings.getJSONArray(roomNames[k]);
                             Log.d("Actual rooms booked", roomNames[k]);
 
@@ -148,73 +152,85 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                bookingDetails = new String[bookings.length()][100];
+                    bookingDetails = new String[bookings.length()][100];
 
-                for (int j = 0; j < bookings.length(); j++) {
-                    roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
-                    Log.d("No.of bookings : ", String.valueOf(roomsBooked.length()));
+                    for (int j = 0; j < bookings.length(); j++) {
+                        roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
+                        Log.d("No.of bookings : ", String.valueOf(roomsBooked.length()));
 
-                    t = 0;
-                    for (int i = 0; i < roomsBooked.length(); i++) {
-                        JSONObject event = roomsBooked.getJSONObject(i);
-                        bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
-                        t++;
-                        Log.d("Booking ID : ", event.optString("Book_ID"));
+                        t = 0;
+                        for (int i = 0; i < roomsBooked.length(); i++) {
+                            JSONObject event = roomsBooked.getJSONObject(i);
+                            bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
+                            t++;
+                            Log.d("Booking ID : ", event.optString("Book_ID"));
 
-                        bookingDetails[j][t] = "Starting Time: " + event.optString("ST");
-                        t++;
-                        Log.d("Starting Time: ", event.optString("ST"));
+                            bookingDetails[j][t] = "Starting Time: " + event.optString("ST");
+                            t++;
+                            Log.d("Starting Time: ", event.optString("ST"));
 
-                        bookingDetails[j][t] = "Ending Time: " + event.optString("ET");
-                        t++;
-                        Log.d("Ending Time: ", event.optString("ET"));
+                            bookingDetails[j][t] = "Ending Time: " + event.optString("ET");
+                            t++;
+                            Log.d("Ending Time: ", event.optString("ET"));
 
-                        bookingDetails[j][t] = "Person: " + event.optString("user");
-                        t++;
-                        Log.d("Person: ", event.optString("user"));
+                            bookingDetails[j][t] = "Person: " + event.optString("user");
+                            t++;
+                            Log.d("Person: ", event.optString("user"));
 
-                        bookingDetails[j][t] = "Status: " + event.optString("status");
-                        t++;
-                        Log.d("Status: ", event.optString("status"));
+                            bookingDetails[j][t] = "Status: " + event.optString("status");
+                            t++;
+                            Log.d("Status: ", event.optString("status"));
+
+                        }
 
                     }
 
+
+
+                List<Map<String, String>> groupData = new ArrayList<>();
+                List<List<Map<String, String>>> childData = new ArrayList<>();
+                // add data in group and child list
+                for (int i = 0; i < bookings.length(); i++) {
+                    Map<String, String> curGroupMap = new HashMap<>();
+                    groupData.add(curGroupMap);
+                    curGroupMap.put(NAME, roomNames[i]);
+
+                    List<Map<String, String>> children = new ArrayList<>();
+                    for (int j = 0; j < bookingsInEachRoom[i]; j++) {
+                        Map<String, String> curChildMap = new HashMap<>();
+                        children.add(curChildMap);
+                        curChildMap.put(NAME, bookingDetails[i][j]);
+                    }
+                    childData.add(children);
                 }
-            } } catch (JSONException e)
+                // define arrays for displaying data in Expandable list view
+                String groupFrom[] = {NAME};
+                int groupTo[] = {R.id.parent_layout};
+                String childFrom[] = {NAME};
+                int childTo[] = {R.id.child_layout};
+
+                    Log.d("======= ", "====Setting adapter");
+
+                // Set up the adapter
+                    eventsAdapter = new SimpleExpandableListAdapter(this, groupData,
+                            R.layout.list_group,
+                            groupFrom, groupTo,
+                            childData, R.layout.list_child,
+                            childFrom, childTo);
+
+                    mActivity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Log.d("======= ", "====Setting list");
+                            eventsList.setAdapter(eventsAdapter);
+                        }
+                    });
+
+            }
+
+            } catch (JSONException e)
             {
-
+                e.printStackTrace();
             }
-
-        List<Map<String, String>> groupData = new ArrayList<Map<String, String>>();
-        List<List<Map<String, String>>> childData = new ArrayList<List<Map<String, String>>>();
-        // add data in group and child list
-        for (int i = 0; i < bookings.length(); i++) {
-            Map<String, String> curGroupMap = new HashMap<String, String>();
-            groupData.add(curGroupMap);
-            curGroupMap.put(NAME, roomNames[i]);
-
-            List<Map<String, String>> children = new ArrayList<Map<String, String>>();
-            for (int j = 0; j < bookingsInEachRoom[i] ; j++) {
-                Map<String, String> curChildMap = new HashMap<String, String>();
-                children.add(curChildMap);
-                curChildMap.put(NAME, bookingDetails[i][j]);
-            }
-            childData.add(children);
-        }
-        // define arrays for displaying data in Expandable list view
-        String groupFrom[] = {NAME};
-        int groupTo[] = {R.id.parent_layout};
-        String childFrom[] = {NAME};
-        int childTo[] = {R.id.child_layout};
-
-
-        // Set up the adapter
-        eventsAdapter = new SimpleExpandableListAdapter(this, groupData,
-                R.layout.list_group,
-                groupFrom, groupTo,
-                childData, R.layout.list_child,
-                childFrom, childTo);
-        eventsList.setAdapter(eventsAdapter);
 
         }
 
@@ -223,59 +239,66 @@ public class MainActivity extends AppCompatActivity {
         monthRequest = new JSONObject();
 
         try {
+            monthRequest.put("Client_ID", "000000");
             monthRequest.put("msg_type", monthRequestMessageType);
             monthRequest.put("year", selectedYear);
-            monthRequest.put("month", monthViewed);
+            monthRequest.put("month", months[monthViewed-1]);
+            //Toast.makeText(getApplicationContext(), monthRequest.toString(10), Toast.LENGTH_LONG).show();
+
+            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_PARSE_MONTH,monthRequest.toString(10));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        //Message msg = new Message();
-        //msg.obj = monthRequest;
-        //DBReqHandler.sendMessage(msg);
 
     }
 
     public void OnMonthSubscription(){
         try {
-            monthResponse = new JSONObject(monthResponseString);
-        }catch (JSONException e){
-            e.printStackTrace();
-        }
+            JSONObject monthResponse = new JSONObject(monthResponseString);
 
-        if(monthResponse.optString("msg_type").equals(monthResponseMessageType) && monthResponse.optString("result").equals("ok")) {
-            daysBooked = monthResponse.optJSONArray("days");
+            Log.d("============",monthResponseString);
+            if(monthResponse.optString("msg_type").equals(monthResponseMessageType) && monthResponse.optString("result").equals("success")) {
+                daysBooked = monthResponse.optJSONArray("days");
 
-            daysToHighlight = new int[daysBooked.length()];
+                daysToHighlight = new int[daysBooked.length()];
 
-            for (int i = 0; i < daysBooked.length(); i++) {
-                try {
+                for (int i = 0; i < daysBooked.length(); i++) {
                     daysToHighlight[i] = Integer.parseInt(daysBooked.getString(i).toString());
                     Log.d("daysBooked", daysBooked.getString(i));
-                    datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed, daysToHighlight[i]));
-                    widget.addDecorator(new EventDecorator(Color.RED, datesHighlighted));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.d("daysBooked", String.valueOf(monthViewed));
+                    datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed -1, daysToHighlight[i]));
                 }
+                        mActivity.runOnUiThread(new Runnable() {
+                            public void run(){
+                                widget.addDecorator(new EventDecorator(Color.RED, datesHighlighted));
+                            }
+                        });
+
             }
-            // Highlight the dates
+        }catch (JSONException e){
+            Log.d("---------------------","=============");
+            e.printStackTrace();
         }
     }
 
     @Override
     protected void onResume()
     {
-        Log.e("on resume","Back tomainactivity");
         super.onResume();
-        widget.setTileWidth((width*9)/60);
+        widget.setTileWidth((width*3)/28);
         monthSubscribe();
         daySubscribe();
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mActivity = this;
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -288,10 +311,9 @@ public class MainActivity extends AppCompatActivity {
 
         widget = findViewById(R.id.calendarView);
         datesHighlighted = new HashSet<>();
-//        datesHighlighted.add(CalendarDay.from(2018, 1, 4));
-//        datesHighlighted.add(CalendarDay.from(2018, 1, 10));
+
         widget.setAllowClickDaysOutsideCurrentMonth(true);
-        widget.setTileWidth((width*9)/60);
+        widget.setTileWidth((width*3)/28);
 
 
         Calendar c = Calendar.getInstance();
@@ -302,16 +324,18 @@ public class MainActivity extends AppCompatActivity {
         currentDay = c.get(Calendar.DAY_OF_MONTH);
 
         roomNames[0] = "MCR";
-        roomNames[1] = "CameraConferenceRoom";
-        roomNames[2] = "ProductConferenceRoom";
-        roomNames[3] = "ReceptionAreaRoom1";
-        roomNames[4] = "ReceptionAreaRoom2";
-        roomNames[5] = "ReceptionAreaRoom3";
+        roomNames[1] = "CCR";
+//        roomNames[2] = "ProductConferenceRoom";
+//        roomNames[3] = "MCRAdjacentRoom";
+//        roomNames[4] = "ReceptionAreaRoom";
+//        roomNames[5] = "MiscRoom";
 
-        selectedMonth = currentMonth;
-        monthViewed = currentMonth;
+        selectedMonth = currentMonth + 1;
+        monthViewed = currentMonth + 1;
         selectedYear = currentYear;
         selectedDay = currentDay;
+        selectedMonthString = months[selectedMonth-1];
+
 
         monthRequestMessageType = new String("RQ_RD_MN");
         monthResponseMessageType = new String("RP_RD_MN");
@@ -319,13 +343,6 @@ public class MainActivity extends AppCompatActivity {
         dayRequestMessageType = new String("RQ_RD_DAY");
         dayResponseMessageType = new String("RP_RD_DAY");
 
-//        currentMonthString = DateFormat.getDateInstance().format(new Date());
-
-//        calendarMain = findViewById(R.id.calendarMain);
-
-//        calendarMain.getDate();
-//        sdf  = new SimpleDateFormat("dd/MM/yyyy");
-//        selectedDate = sdf.format(new Date(calendarMain.getDate()));
 
         eventsList = findViewById(R.id.events);
 
@@ -336,10 +353,8 @@ public class MainActivity extends AppCompatActivity {
                 return false;       }
         });
 
-        //mSubscription = new subscriptions("HANDLER");
-        //mSubscription.start();
 
-        /*
+
         dbReqHandler = new DBReqHandler(getApplicationContext(), new DBReqHandler.IDBReqHandler() {
             @Override
             public void testCallback(String ans)
@@ -347,56 +362,42 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject response;
                 try {
                     response = new JSONObject(ans);
+
+                    if(response.optString("msg_type").equals(monthResponseMessageType)) {
+                        monthResponseString = ans;
+                        //Toast.makeText(MainActivity.this, "Month - " + monthResponseString, Toast.LENGTH_SHORT).show();
+                        //monthResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_RD_MN\",\"days\": [\"16\",\"17\",\"30\"],\"result\": \"ok\",\"err_code\": 400}";
+
+                        OnMonthSubscription();
+                    }
+
+                    if(response.optString("msg_type").equals(dayResponseMessageType)) {
+                        dayResponseString = ans;
+                        //Toast.makeText(MainActivity.this, "Day - " + ans, Toast.LENGTH_SHORT).show();
+                        //dayResponseString = "{\"client_id\": 432234,\"msg_type\":\"RP_RD_DAY\",\"bookings\":{\"MCR\":[{\"Book_ID\":\"B1\",\"ST\":\"11.30\",\"ET\":\"12.0\",\"user\":\"vishnu\", \"status\":\"BUSY\"},{\"Book_ID\":\"B2\",\"ST\":\"12.30\",\"ET\":\"13.0\",\"user\":\"vishnu\",\"status\":\"BOOKED\" }],\"CameraConferenceRoom\": [{\"Book_ID\":\"B3\",\"ST\":\"12.30\",\"ET\":\"13.45\",\"user\":\"vishnu\",\"status\":\"BUSY\"}]},\"result\":\"ok\",\"err_code\":400 }";
+                        OnDaySubscription();
+                    }
+
                 }catch (JSONException e){
                     e.printStackTrace();
                 }
 
-                if(response.optString("msg_type").equals(monthResponseMessageType)) {
-                    monthResponseString = ans;
-                    monthResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_RD_MN\",\"days\": [\"16\",\"17\",\"30\"],\"result\": \"ok\",\"err_code\": 400}";
-                    OnMonthSubscription();
-                }
 
-                if(response.optString("msg_type").equals(dayResponseMessageType)) {
-                    dayResponseString = ans;
-                    dayResponseString = "{\"client_id\": 432234,\"msg_type\":\"RP_RD_DAY\",\"bookings\":{\"MCR\":[{\"Book_ID\":\"B1\",\"ST\":\"11.30\",\"ET\":\"12.0\",\"user\":\"vishnu\", \"status\":\"BUSY\"},{\"Book_ID\":\"B2\",\"ST\":\"12.30\",\"ET\":\"13.0\",\"user\":\"vishnu\",\"status\":\"BOOKED\" }],\"CameraConferenceRoom\": [{\"Book_ID\":\"B3\",\"ST\":\"12.30\",\"ET\":\"13.45\",\"user\":\"vishnu\",\"status\":\"BUSY\"}]},\"result\":\"ok\",\"err_code\":400 }";
-                    OnDaySubscription();
-                }
-
-                Toast.makeText(MainActivity.this, "SM IS" + ans, Toast.LENGTH_SHORT).show();
             }
         });
-        */
-
-        daySubscribe();
-        monthSubscribe();
-
-//        calendarMain.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-//            @Override
-//            public void onSelectedDayChange(CalendarView view, int year, int month, int dayofMonth) {
-////            if(selectedDay != dayofMonth)
-//                daySubscribe();
-//
-//             selectedDay = dayofMonth;
-//             selectedMonth = month + 1;
-//             selectedYear = year;
-//
-//             monthSubscribe();
-//             Toast.makeText(getApplicationContext(),selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();             Toast.makeText(getApplicationContext(),selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_LONG).show();
-//            }
-//        });
 
         widget.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                daySubscribe();
+
 
                 selectedDay = date.getDay();
                 selectedMonth = date.getMonth() + 1;
+                selectedMonthString = months[selectedMonth-1];
                 selectedYear = date.getYear();
 
                 Toast.makeText(getApplicationContext(), "Date Changed : " + selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();
-
+                daySubscribe();
             }
 
         });
@@ -405,8 +406,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
                 monthViewed = date.getMonth() + 1 ;
-                monthSubscribe();
+
                 Toast.makeText(getApplicationContext(),"Month Changed : " + monthViewed, Toast.LENGTH_SHORT).show();
+
+               monthSubscribe();
             }
         });
 
@@ -423,8 +426,8 @@ public class MainActivity extends AppCompatActivity {
         {
             formActivity.putExtra("selectedYear", selectedYear);
             formActivity.putExtra("selectedMonth", selectedMonth);
+            formActivity.putExtra("selectedMonthString", selectedMonthString);
             formActivity.putExtra("selectedDay", selectedDay);
-            //formActivity.putExtra("dbReqHandler", dbReqHandler);
             startActivity(formActivity);
         }
     }
