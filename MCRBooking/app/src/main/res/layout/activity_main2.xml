@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="2.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,111 +7,121 @@
     android:background="@color/colorBlack"
     tools:context="kiosk.android.econ.mcrbooking.Main2Activity">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorBlack"
+        android:orientation="horizontal"
         android:weightSum="4"
-        android:orientation="horizontal">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="84dp"
+        tools:ignore="MissingConstraints">
 
         <LinearLayout
             android:id="@+id/dateTimeLayout"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:weightSum="7"
             android:layout_height="match_parent"
-            android:background="@drawable/circuit_bg"
-            android:orientation="vertical">
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="10dp"
+            android:elevation="30dp"
+            android:translationZ="20dp"
+            android:layout_weight="1"
+            android:background="@drawable/layout_shadows"
+            android:orientation="vertical"
+            android:weightSum="3">
 
 
             <TextClock
                 android:id="@+id/textClock"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"
-                android:textAlignment="textEnd"
-                android:textColor="@color/colorWhite"
+                android:layout_weight="1"
+                android:textAlignment="textStart"
+                android:textColor="#aaffffff"
                 android:textSize="50dp" />
 
             <TextView
                 android:id="@+id/dateText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"
-                android:textAlignment="textEnd"
-                android:textColor="@color/colorWhite"
-                android:textStyle="bold"
-                android:textSize="30dp" />
+                android:layout_weight="1"
+                android:textAlignment="textStart"
+                android:textColor="#aaffffff"
+                android:textSize="20dp" />
 
             <TextView
                 android:id="@+id/selectedDateText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"
-                android:textStyle="bold"
-                android:textAlignment="textEnd"
-                android:textColor="@color/colorWhite"
-                android:textSize="30dp" />
+                android:layout_weight="1"
+                android:textAlignment="textStart"
+                android:textColor="#aaffffff"
+                android:textSize="20dp" />
 
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="3"
-            android:weightSum="7"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_weight="3"
+            android:orientation="vertical"
+            android:weightSum="7">
 
             <TableLayout
                 android:layout_width="match_parent"
-                android:layout_weight="3"
-                android:weightSum="4"
                 android:layout_height="0dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="20dp">
+                android:layout_weight="4"
+                android:weightSum="4">
 
                 <TableRow
+                    android:layout_width="0dp"
+                    android:layout_marginLeft="1dp"
+                    android:layout_marginRight="5dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:layout_width="0dp">
+                    android:elevation="10dp"
+                    android:translationZ="10dp"
+                    android:weightSum="2">
 
 
                     <TextView
                         android:id="@+id/startTimeText"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
-                        android:layout_gravity="center"
+                        android:layout_weight="1"
                         android:labelFor="@+id/startTime"
-                        android:padding="3dp"
+                        android:background="@drawable/layout_shadows"
                         android:text="@string/start_time"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                        android:textColor="@color/colorRed"
+                        android:textColor="#aaffffff"
                         android:textSize="30dp"
-                        android:visibility="visible" />
+                        android:visibility="visible"
+                        android:layout_marginRight="5dp"/>
 
                     <TextView
                         android:id="@+id/endTimeText"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:labelFor="@+id/endTime"
-                        android:padding="3dp"
+                        android:background="@drawable/layout_shadows"
                         android:text="@string/end_time"
                         android:textAlignment="center"
+                        android:layout_marginLeft="5dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                        android:textColor="@color/colorRed"
+                        android:textColor="#aaffffff"
                         android:textSize="30dp" />
 
 
                 </TableRow>
 
                 <TableRow
+                    android:layout_marginRight="5dp"
                     android:layout_weight="3"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
 
                     <!--<NumberPicker-->
@@ -124,84 +134,94 @@
                     <!--android:theme="@android:style/Theme.Holo.NoActionBar"></NumberPicker>-->
 
                     <LinearLayout
-                        android:layout_gravity="center"
-                        android:orientation="horizontal"
                         android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="5dp"
                         android:layout_weight="1"
+                        android:background="#42555555"
+                        android:orientation="horizontal"
+                        android:elevation="10dp"
                         android:weightSum="4">
 
                         <NumberPicker
                             android:id="@+id/shours"
                             android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:layout_height="wrap_content"
                             android:clickable="false"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="match_parent"
-                            android:padding="10dp"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
                             android:text="Hrs"
                             android:textAlignment="center"
-                            android:textColor="@color/colorGreen"
-                            android:textSize="30dp" />
+                            android:textColor="#aaffffff"
+                            android:textSize="20dp" />
 
                         <NumberPicker
                             android:id="@+id/sminutes"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"></NumberPicker>
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
                             android:text="Min"
                             android:textAlignment="center"
-                            android:textColor="@color/colorGreen"
-                            android:textSize="30dp" />
+                            android:textColor="#aaffffff"
+                            android:textSize="20dp" />
 
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_gravity="center"
-                        android:orientation="horizontal"
                         android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginRight="1dp"
+                        android:layout_marginLeft="5dp"
                         android:layout_weight="1"
-                        android:weightSum="4">
+                        android:background="#42555555"
+                        android:orientation="horizontal"
+                        android:weightSum="4"
+                        android:elevation="10dp">
 
                         <NumberPicker
                             android:id="@+id/hours"
                             android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:layout_height="wrap_content"
                             android:clickable="false"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="match_parent"
-                            android:padding="10dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
                             android:text="Hrs"
                             android:textAlignment="center"
-                            android:textColor="@color/colorGreen"
-                            android:textSize="30dp" />
+                            android:textColor="#aaffffff"
+                            android:textSize="20dp" />
 
                         <NumberPicker
                             android:id="@+id/minutes"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"></NumberPicker>
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
                             android:text="Min"
                             android:textAlignment="center"
-                            android:textColor="@color/colorGreen"
-                            android:textSize="30dp" />
+                            android:textColor="#aaffffff"
+                            android:textSize="20dp" />
 
                     </LinearLayout>
 
@@ -221,124 +241,128 @@
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="3"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp">
+                android:layout_gravity="top"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="2"
+                android:elevation="2dp"
+                android:translationZ="5dp"
+                >
 
                 <TableRow
                     android:layout_gravity="center"
-                    android:weightSum="3">
+                    android:weightSum="2"
+                    android:elevation="10dp"
+                    android:translationZ="10dp"
+                    android:background="@drawable/layout_shadows">
+
 
                     <TextView
                         android:id="@+id/nameText"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:labelFor="@+id/nameInput"
                         android:text="@string/name"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                        android:textColor="@color/colorRed"
+                        android:textColor="#aaffffff"
                         android:textSize="30dp" />
 
                     <TextView
                         android:id="@+id/roomText"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:labelFor="@+id/spinner"
                         android:padding="3dp"
                         android:text="@string/room"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                        android:textColor="@color/colorRed"
-                        android:textSize="30dp" />
-
-                    <TextView
-                        android:id="@+id/purposeText"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="match_parent"
-                        android:labelFor="@+id/purpose"
-                        android:padding="3dp"
-                        android:text="@string/purpose"
-                        android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                        android:textColor="@color/colorRed"
+                        android:textColor="#aaffffff"
                         android:textSize="30dp" />
 
                 </TableRow>
 
                 <TableRow
                     android:layout_gravity="center"
-                    android:weightSum="3" >
+                    android:weightSum="2">
 
                     <EditText
                         android:id="@+id/nameInput"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:hint="@string/name_hint"
-                        android:padding="3dp"
-                        android:textAlignment="center"
-                        android:textSize="30dp" />
+                        android:background="#42555555"
+                        android:textColor="@color/colorWhite"/>
 
                     <Spinner
                         android:id="@+id/spinner"
                         android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:layout_height="match_parent"
-                        android:padding="20dp" />
-
-                    <EditText
-                        android:id="@+id/purpose"
-                        android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="match_parent"
-                        android:hint="@string/purpose_hint"
-                        android:layout_gravity="center"
-                        android:padding="3dp"
-                        android:textAlignment="center"
-                        android:textSize="30dp" />
+                        android:textColor="#aaffffff"
+                        android:background="#42555555"
+                        android:paddingTop="10dp" />
 
                 </TableRow>
+
+                <EditText
+                    android:id="@+id/purpose"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:hint="Description"
+                    android:background="#42555555"
+                    android:maxLength="100"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="25dp" />
 
             </TableLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="5dp"
                 android:layout_weight="1"
-                android:weightSum="6"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/cancel"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_weight="2"
-                    android:background="@color/colorButtons"
-                    android:onClick="cancel"
-                    android:text="@string/cancel"
-                    android:textColor="@color/colorGreen"
-                    android:textSize="20dp"
-                    android:textStyle="normal"
-                    android:visibility="invisible" />
+                android:orientation="horizontal"
+                android:weightSum="2">
 
                 <Button
                     android:id="@+id/book"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_weight="2"
-                    android:background="@color/colorButtons"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_button"
                     android:onClick="bookRoom"
                     android:text="@string/book"
-                    android:textColor="@color/colorGreen"
+                    android:textColor="#aaffffff"
                     android:textSize="20dp"
                     android:textStyle="normal" />
+
+                <Button
+                    android:id="@+id/cancel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_button"
+                    android:onClick="cancel"
+                    android:text="@string/cancel"
+                    android:textColor="#aaffffff"
+                    android:textSize="20dp"
+                    android:textStyle="normal"
+                    android:visibility="visible" />
 
             </LinearLayout>
 

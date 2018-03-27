@@ -48,21 +48,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:weightSum="5"
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
 
-            <Button
-                android:id="@+id/addEvent"
-                android:layout_gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="@string/add_event"
-                android:textColor="@color/colorGreen"
-                android:textSize="20dp"
-                android:textStyle="normal"
-                android:background="@color/colorButtons"
-                android:onClick="gotoformActivity" />
+                <Button
+                    android:id="@+id/addEvent"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="3"
+                    android:text="@string/add_event"
+                    android:textColor="#aaffffff"
+                    android:textSize="20dp"
+                    android:textStyle="normal"
+                    android:padding="5dp"
+                    android:background="@drawable/layout_button"
+                    android:onClick="gotoformActivity" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="2"
+                    android:layout_marginTop="2dp"
+                    android:text="Bookings"
+                    android:gravity="bottom"
+                    android:background="#111111"
+                    android:textAlignment="center"
+                    android:textSize="25dp"/>
 
             </LinearLayout>
 
@@ -70,7 +82,8 @@
                 android:id="@+id/events"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="7" />
+                android:layout_weight="7"
+                android:childIndicator="@null" />
 
         </LinearLayout>
 

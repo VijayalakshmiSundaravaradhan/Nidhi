@@ -6,6 +6,7 @@ import android.graphics.Color;
 
 
 import android.icu.text.SimpleDateFormat;
+import android.nfc.Tag;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 
 import com.econ.kannan.DBReqHandler;
+
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
 import android.widget.SimpleExpandableListAdapter;
@@ -23,6 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -128,14 +132,14 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject dayResponse = new JSONObject(dayResponseString);
                 Log.d("No.of bookings : ", "On day sub" + dayResponse.optString("Client_ID"));
 
-
                 if (dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("success")) {
 
                     bookings = dayResponse.getJSONObject("bookings");
                     Log.d("No.of bookings : ", String.valueOf(bookings.length()));
 
-                    if (bookings.length() <= 0)
+                    if (bookings.length() <= 0) {
                         return;
+                    }
 
                     t = 0;
                     bookingsInEachRoom = new int[bookings.length()];
@@ -146,13 +150,16 @@ public class MainActivity extends AppCompatActivity {
                             roomsBooked = bookings.getJSONArray(roomNames[k]);
                             Log.d("Actual rooms booked", roomNames[k]);
 
-                            bookingsInEachRoom[t] = roomsBooked.length() * 5;
+                            bookingsInEachRoom[t] = roomsBooked.length();
                             roomsActuallyBooked[t] = roomNames[k];
                             t++;
                         }
                     }
 
                     bookingDetails = new String[bookings.length()][100];
+                    List<Map<String, String>> groupData = new ArrayList<>();
+                    List<List<Map<String, String>>> childData = new ArrayList<>();
+
 
                     for (int j = 0; j < bookings.length(); j++) {
                         roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
@@ -161,36 +168,47 @@ public class MainActivity extends AppCompatActivity {
                         t = 0;
                         for (int i = 0; i < roomsBooked.length(); i++) {
                             JSONObject event = roomsBooked.getJSONObject(i);
+
+
+                            bookingDetails[j][t] = event.optString("ST") + " - " + event.optString("ET");
+                            Map<String, String> curGroupMap = new HashMap<>();
+                            groupData.add(curGroupMap);
+                            curGroupMap.put(NAME, roomsActuallyBooked[j]);
+                            curGroupMap.put("time", bookingDetails[j][t]);
+                            Log.d("Timing: ", bookingDetails[j][t] );
+                            t++;
+
+
                             bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
+                            List<Map<String, String>> children = new ArrayList<>();
+                            Map<String, String> idChildMap = new HashMap<>();
+                            children.add(idChildMap);
+                            idChildMap.put(NAME, bookingDetails[j][t]);
+                            Log.d("Booking ID : ", bookingDetails[j][t]);
                             t++;
-                            Log.d("Booking ID : ", event.optString("Book_ID"));
 
-                            bookingDetails[j][t] = "Starting Time: " + event.optString("ST");
-                            t++;
-                            Log.d("Starting Time: ", event.optString("ST"));
-
-                            bookingDetails[j][t] = "Ending Time: " + event.optString("ET");
-                            t++;
-                            Log.d("Ending Time: ", event.optString("ET"));
 
                             bookingDetails[j][t] = "Person: " + event.optString("user");
+                            Map<String, String> personChildMap = new HashMap<>();
+                            children.add(personChildMap);
+                            personChildMap.put(NAME, bookingDetails[j][t]);
+                            Log.d("Person: ", bookingDetails[j][t]);
                             t++;
-                            Log.d("Person: ", event.optString("user"));
 
                             bookingDetails[j][t] = "Status: " + event.optString("status");
+                            Map<String, String> statusChildMap = new HashMap<>();
+                            children.add(statusChildMap);
+                            statusChildMap.put(NAME, bookingDetails[j][t]);
+
+                            childData.add(children);
+                            Log.d("Status: ", bookingDetails[j][t]);
                             t++;
-                            Log.d("Status: ", event.optString("status"));
 
                         }
 
                     }
-
-
-
-                List<Map<String, String>> groupData = new ArrayList<>();
-                List<List<Map<String, String>>> childData = new ArrayList<>();
                 // add data in group and child list
-                for (int i = 0; i < bookings.length(); i++) {
+                /*for (int i = 0; i < bookings.length(); i++) {
                     Map<String, String> curGroupMap = new HashMap<>();
                     groupData.add(curGroupMap);
                     curGroupMap.put(NAME, roomNames[i]);
@@ -202,10 +220,10 @@ public class MainActivity extends AppCompatActivity {
                         curChildMap.put(NAME, bookingDetails[i][j]);
                     }
                     childData.add(children);
-                }
+                }*/
                 // define arrays for displaying data in Expandable list view
-                String groupFrom[] = {NAME};
-                int groupTo[] = {R.id.parent_layout};
+                String groupFrom[] = {NAME,"time"};
+                int groupTo[] = {R.id.parent_layout,R.id.timing};
                 String childFrom[] = {NAME};
                 int childTo[] = {R.id.child_layout};
 
@@ -222,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             Log.d("======= ", "====Setting list");
                             eventsList.setAdapter(eventsAdapter);
+                            eventsList.setVisibility(View.VISIBLE);
                         }
                     });
 
@@ -286,10 +305,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume()
     {
+        Log.d("debug","onResume" );
         super.onResume();
         widget.setTileWidth((width*3)/28);
         monthSubscribe();
         daySubscribe();
+    }
+
+    public class reqHandler implements DBReqHandler.IDBReqHandler, Serializable {
+
+       @Override
+            public void testCallback(String ans)
+            {
+                JSONObject response;
+                try {
+                    response = new JSONObject(ans);
+
+                    if(response.optString("msg_type").equals(monthResponseMessageType)) {
+                        monthResponseString = ans;
+                        //Toast.makeText(MainActivity.this, "Month - " + monthResponseString, Toast.LENGTH_SHORT).show();
+                        //monthResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_RD_MN\",\"days\": [\"16\",\"17\",\"30\"],\"result\": \"ok\",\"err_code\": 400}";
+
+                        OnMonthSubscription();
+                    }
+
+                    if(response.optString("msg_type").equals(dayResponseMessageType)) {
+                        dayResponseString = ans;
+                        //Toast.makeText(MainActivity.this, "Day - " + ans, Toast.LENGTH_SHORT).show();
+                        //dayResponseString = "{\"client_id\": 432234,\"msg_type\":\"RP_RD_DAY\",\"bookings\":{\"MCR\":[{\"Book_ID\":\"B1\",\"ST\":\"11.30\",\"ET\":\"12.0\",\"user\":\"vishnu\", \"status\":\"BUSY\"},{\"Book_ID\":\"B2\",\"ST\":\"12.30\",\"ET\":\"13.0\",\"user\":\"vishnu\",\"status\":\"BOOKED\" }],\"CameraConferenceRoom\": [{\"Book_ID\":\"B3\",\"ST\":\"12.30\",\"ET\":\"13.45\",\"user\":\"vishnu\",\"status\":\"BUSY\"}]},\"result\":\"ok\",\"err_code\":400 }";
+                        OnDaySubscription();
+                    }
+
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+
+            }
     }
 
 
@@ -349,42 +401,16 @@ public class MainActivity extends AppCompatActivity {
         eventsList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int groupPosition, long id) {
-                Toast.makeText(getApplicationContext(), "Room Name Is :" + roomNames[groupPosition], Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Room Name Is :" + roomNames[groupPosition], Toast.LENGTH_SHORT).show();
                 return false;       }
         });
 
 
 
-        dbReqHandler = new DBReqHandler(getApplicationContext(), new DBReqHandler.IDBReqHandler() {
-            @Override
-            public void testCallback(String ans)
-            {
-                JSONObject response;
-                try {
-                    response = new JSONObject(ans);
-
-                    if(response.optString("msg_type").equals(monthResponseMessageType)) {
-                        monthResponseString = ans;
-                        //Toast.makeText(MainActivity.this, "Month - " + monthResponseString, Toast.LENGTH_SHORT).show();
-                        //monthResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_RD_MN\",\"days\": [\"16\",\"17\",\"30\"],\"result\": \"ok\",\"err_code\": 400}";
-
-                        OnMonthSubscription();
-                    }
-
-                    if(response.optString("msg_type").equals(dayResponseMessageType)) {
-                        dayResponseString = ans;
-                        //Toast.makeText(MainActivity.this, "Day - " + ans, Toast.LENGTH_SHORT).show();
-                        //dayResponseString = "{\"client_id\": 432234,\"msg_type\":\"RP_RD_DAY\",\"bookings\":{\"MCR\":[{\"Book_ID\":\"B1\",\"ST\":\"11.30\",\"ET\":\"12.0\",\"user\":\"vishnu\", \"status\":\"BUSY\"},{\"Book_ID\":\"B2\",\"ST\":\"12.30\",\"ET\":\"13.0\",\"user\":\"vishnu\",\"status\":\"BOOKED\" }],\"CameraConferenceRoom\": [{\"Book_ID\":\"B3\",\"ST\":\"12.30\",\"ET\":\"13.45\",\"user\":\"vishnu\",\"status\":\"BUSY\"}]},\"result\":\"ok\",\"err_code\":400 }";
-                        OnDaySubscription();
-                    }
-
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
+        DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
+        dbReqHandler = new DBReqHandler(getApplicationContext(),reqhandler);
+        monthSubscribe();
+        daySubscribe();
 
         widget.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
@@ -395,6 +421,8 @@ public class MainActivity extends AppCompatActivity {
                 selectedMonth = date.getMonth() + 1;
                 selectedMonthString = months[selectedMonth-1];
                 selectedYear = date.getYear();
+
+                eventsList.setVisibility(View.INVISIBLE);
 
                 Toast.makeText(getApplicationContext(), "Date Changed : " + selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();
                 daySubscribe();
@@ -418,11 +446,7 @@ public class MainActivity extends AppCompatActivity {
     public void gotoformActivity(View v)    {
         Intent formActivity = new Intent(this,Main2Activity.class);
 
-        if(selectedYear < currentYear || selectedMonth < currentMonth || selectedDay < currentDay)
-        {
-            Toast.makeText(getApplicationContext(),"Please select a valid date ", Toast.LENGTH_SHORT).show();
-        }
-        else
+        if(selectedYear > currentYear || (selectedYear == currentYear && (selectedMonth > currentMonth || (selectedMonth == currentMonth && selectedDay >= currentDay))))
         {
             formActivity.putExtra("selectedYear", selectedYear);
             formActivity.putExtra("selectedMonth", selectedMonth);
@@ -430,6 +454,11 @@ public class MainActivity extends AppCompatActivity {
             formActivity.putExtra("selectedDay", selectedDay);
             startActivity(formActivity);
         }
+        else {
+            Toast.makeText(getApplicationContext(),"Please select a valid date ", Toast.LENGTH_SHORT).show();
+
+        }
+
     }
 
 }

@@ -70,6 +70,38 @@ public class Main2Activity extends AppCompatActivity {
     AlertDialog cancelDialog;
     DBReqHandler dbReqHandler;
 
+
+    public class reqHandler implements DBReqHandler.IDBReqHandler {
+
+        @Override
+        public void testCallback(String ans)
+        {
+            Log.d("On callback", "-----");
+            JSONObject response;
+            try {
+                response = new JSONObject(ans);
+
+
+                if(response.optString("msg_type").equals(bookResponseMessageType)) {
+                    bookRoomResponseString = ans;
+                    //bookRoomResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
+                    OnBookingRoom();
+                }
+
+                if(response.optString("msg_type").equals(cancelResponseMessageType)) {
+                    cancelResponseString = ans;
+                    //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
+                    OnCancelling();
+                }
+
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+
+            Toast.makeText(getApplicationContext(), "SM IS" + ans, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,37 +125,9 @@ public class Main2Activity extends AppCompatActivity {
         selectedMonthString = getIntent().getStringExtra("selectedMonthString");
         selectedDay = getIntent().getIntExtra("selectedDay",0);
 
+        DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
 
-
-        dbReqHandler = new DBReqHandler(getApplicationContext(), new DBReqHandler.IDBReqHandler() {
-            @Override
-            public void testCallback(String ans)
-            {
-                Log.d("On callback", "-----");
-                JSONObject response;
-                try {
-                    response = new JSONObject(ans);
-
-
-                    if(response.optString("msg_type").equals(bookResponseMessageType)) {
-                        bookRoomResponseString = ans;
-                        //bookRoomResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
-                        OnBookingRoom();
-                    }
-
-                    if(response.optString("msg_type").equals(cancelResponseMessageType)) {
-                        cancelResponseString = ans;
-                        //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
-                        OnCancelling();
-                    }
-
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-
-                Toast.makeText(getApplicationContext(), "SM IS" + ans, Toast.LENGTH_SHORT).show();
-            }
-        });
+        dbReqHandler = new DBReqHandler(getApplicationContext(),reqhandler);
 
         builder = new AlertDialog.Builder(this);
         builder.setTitle("Cancel");
@@ -258,7 +262,11 @@ public class Main2Activity extends AppCompatActivity {
 
    }
 
-
+    @Override
+    public void onDestroy() {
+        dbReqHandler = null;
+        super.onDestroy();
+    }
 
     public void bookRoom(View v)
     {
@@ -304,7 +312,7 @@ public class Main2Activity extends AppCompatActivity {
             JSONObject bookingResponse = new JSONObject(bookRoomResponseString);
 
             Log.d("============",bookRoomResponseString);
-            if(bookingResponse.optString("msg_type").equals(bookResponseMessageType) && bookingResponse.optString("result").equals("success")) {
+            if(bookingResponse.optString("msg_type").equals(bookResponseMessageType) && bookingResponse.optString("result").equals("SUCCESS")) {
                 Toast.makeText(getApplicationContext(), "Booking Successful" , Toast.LENGTH_SHORT).show();
             }
             else {
