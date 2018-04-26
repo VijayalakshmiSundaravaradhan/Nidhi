@@ -149,7 +149,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:clickable="false"></NumberPicker>
+                            android:clickable="false"
+                            android:descendantFocusability="blocksDescendants"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -165,7 +166,8 @@
                             android:id="@+id/sminutes"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
-                            android:layout_weight="1"></NumberPicker>
+                            android:layout_weight="1"
+                            android:descendantFocusability="blocksDescendants"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -195,7 +197,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:clickable="false"></NumberPicker>
+                            android:clickable="false"
+                            android:descendantFocusability="blocksDescendants"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -211,7 +214,8 @@
                             android:id="@+id/minutes"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
-                            android:layout_weight="1"></NumberPicker>
+                            android:layout_weight="1"
+                            android:descendantFocusability="blocksDescendants"></NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"

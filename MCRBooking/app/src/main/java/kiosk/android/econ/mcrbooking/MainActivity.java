@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private String[][] bookingDetails;
 
     private static final String NAME = "NAME";
-    public static final String[] months = new String[]{"jan", "feb", "mar", "apr", "jun",
+    public static final String[] months = new String[]{"jan", "feb", "mar", "apr", "may", "jun",
             "jul", "aug", "sep", "oct", "nov", "dec"};
 
     int selectedYear;
@@ -107,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
             dayRequest.put("month", selectedMonthString);
             dayRequest.put("day", selectedDay);
 
-            //Toast.makeText(getApplicationContext(), dayRequest.toString(10), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), dayRequest.toString(), Toast.LENGTH_SHORT).show();
 
-            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_PARSE_DATE,dayRequest.toString(10));
+            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_PARSE_DATE,dayRequest.toString());
 
         }catch (JSONException e){
             e.printStackTrace();
@@ -261,10 +261,11 @@ public class MainActivity extends AppCompatActivity {
             monthRequest.put("Client_ID", "000000");
             monthRequest.put("msg_type", monthRequestMessageType);
             monthRequest.put("year", selectedYear);
-            monthRequest.put("month", months[monthViewed-1]);
+            monthRequest.put("month", months[monthViewed]);
             //Toast.makeText(getApplicationContext(), monthRequest.toString(10), Toast.LENGTH_LONG).show();
 
-            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_PARSE_MONTH,monthRequest.toString(10));
+            Log.d("Month string : ", months[monthViewed]);
+            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_PARSE_MONTH,monthRequest.toString());
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -287,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
                     daysToHighlight[i] = Integer.parseInt(daysBooked.getString(i).toString());
                     Log.d("daysBooked", daysBooked.getString(i));
                     Log.d("daysBooked", String.valueOf(monthViewed));
-                    datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed -1, daysToHighlight[i]));
+                    datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed, daysToHighlight[i]));
                 }
                         mActivity.runOnUiThread(new Runnable() {
                             public void run(){
@@ -382,11 +383,13 @@ public class MainActivity extends AppCompatActivity {
 //        roomNames[4] = "ReceptionAreaRoom";
 //        roomNames[5] = "MiscRoom";
 
-        selectedMonth = currentMonth + 1;
-        monthViewed = currentMonth + 1;
+        selectedMonth = currentMonth;
+        monthViewed = currentMonth;
         selectedYear = currentYear;
         selectedDay = currentDay;
-        selectedMonthString = months[selectedMonth-1];
+        selectedMonthString = months[selectedMonth];
+
+        Log.d("Month :", monthViewed + " " + selectedMonth);
 
 
         monthRequestMessageType = new String("RQ_RD_MN");
@@ -416,15 +419,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
 
-
+                //Log.d("day change", ".....");
                 selectedDay = date.getDay();
-                selectedMonth = date.getMonth() + 1;
-                selectedMonthString = months[selectedMonth-1];
+                selectedMonth = date.getMonth();
+                selectedMonthString = months[selectedMonth];
                 selectedYear = date.getYear();
 
                 eventsList.setVisibility(View.INVISIBLE);
 
-                Toast.makeText(getApplicationContext(), "Date Changed : " + selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Date Changed : " + selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();
                 daySubscribe();
             }
 
@@ -433,9 +436,10 @@ public class MainActivity extends AppCompatActivity {
         widget.setOnMonthChangedListener(new OnMonthChangedListener() {
             @Override
             public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
-                monthViewed = date.getMonth() + 1 ;
+                monthViewed = date.getMonth() ;
+                Log.d("Month Changed", monthViewed + " " + date.getMonth());
 
-                Toast.makeText(getApplicationContext(),"Month Changed : " + monthViewed, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),"Month Changed : " + monthViewed, Toast.LENGTH_SHORT).show();
 
                monthSubscribe();
             }
@@ -446,8 +450,10 @@ public class MainActivity extends AppCompatActivity {
     public void gotoformActivity(View v)    {
         Intent formActivity = new Intent(this,Main2Activity.class);
 
-        if(selectedYear > currentYear || (selectedYear == currentYear && (selectedMonth > currentMonth || (selectedMonth == currentMonth && selectedDay >= currentDay))))
+        Log.d("month issue", currentMonth + " " + currentDay + " " + currentYear + " " + selectedMonth + " " + selectedDay);
+        if(selectedYear >= currentYear && selectedMonth >= currentMonth && selectedDay >= currentDay)
         {
+
             formActivity.putExtra("selectedYear", selectedYear);
             formActivity.putExtra("selectedMonth", selectedMonth);
             formActivity.putExtra("selectedMonthString", selectedMonthString);

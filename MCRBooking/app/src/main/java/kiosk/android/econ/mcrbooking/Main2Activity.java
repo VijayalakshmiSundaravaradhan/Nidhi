@@ -1,6 +1,8 @@
 package kiosk.android.econ.mcrbooking;
 
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,11 +17,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.econ.kannan.DBReqHandler;
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class Main2Activity extends AppCompatActivity {
@@ -27,6 +31,7 @@ public class Main2Activity extends AppCompatActivity {
     String currentDateString;
     TextView dateText;
     TextView selectedDateText;
+    Activity m2Activity;
 
     NumberPicker s_hours;
     NumberPicker s_minutes;
@@ -98,7 +103,7 @@ public class Main2Activity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            Toast.makeText(getApplicationContext(), "SM IS" + ans, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "SM IS" + ans, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -106,7 +111,7 @@ public class Main2Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-
+        m2Activity = this;
         currentDateString = DateFormat.getDateInstance().format(new Date());
         dateText = findViewById(R.id.dateText);
         selectedDateText = findViewById(R.id.selectedDateText);
@@ -153,7 +158,7 @@ public class Main2Activity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"Booking ID not specified!!" , Toast.LENGTH_SHORT).show();
                 else
                 {
-                    Toast.makeText(getApplicationContext(),"{\"request\":\"RQ_CL\",\"Book_id\":\""+bookingID+"\",\"user\":\""+user+"\"}",Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(getApplicationContext(),"{\"request\":\"RQ_CL\",\"Book_id\":\""+bookingID+"\",\"user\":\""+user+"\"}",Toast.LENGTH_SHORT).show();
 
                     cancelRequest = new JSONObject();
 
@@ -163,7 +168,7 @@ public class Main2Activity extends AppCompatActivity {
                         cancelRequest.put("Book_id", bookingID);
                         cancelRequest.put("user", Person);
 
-                        dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString(10));
+                        dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString());
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -183,11 +188,12 @@ public class Main2Activity extends AppCompatActivity {
         cancelDialog = builder.create();
 
         dateText.setText("Current Date : "+currentDateString);
+        selectedMonth++;
         selectedDateText.setText("Selected Date : "+selectedDay+"-"+selectedMonth+"-"+selectedYear);
 
         room = findViewById(R.id.spinner);
         final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.confRooms, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         room.setAdapter(adapter);
 
         room.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
@@ -219,7 +225,7 @@ public class Main2Activity extends AppCompatActivity {
 
         selectedSHour = startTimes[s_hours.getValue()];
         selectedSMinute = String.valueOf(s_minutes.getValue());
-        setEndTime();
+        //setEndTime();
 
 
         updateHours();
@@ -257,6 +263,7 @@ public class Main2Activity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker numberPicker, int oldValue, int newValue) {
                 selectedEMinute = String.valueOf(newValue);
+                setEndTime();
             }
         });
 
@@ -270,9 +277,20 @@ public class Main2Activity extends AppCompatActivity {
 
     public void bookRoom(View v)
     {
+        Calendar c = Calendar.getInstance();
+        int currentYear = c.get(Calendar.YEAR);
+        int currentMonth = c.get(Calendar.MONTH);
+        int currentDay = c.get(Calendar.DAY_OF_MONTH);
+        int currentHour = c.get(Calendar.HOUR_OF_DAY);
+        Log.d("current hour", " " + currentHour);
+        int currentMinute = c.get(Calendar.MINUTE);
         Person = nameInput.getText().toString().toUpperCase();
         if(Person.isEmpty())
-            Toast.makeText(getApplicationContext(),"Please enter your good name" , Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Please enter your good name !" , Toast.LENGTH_SHORT).show();
+        else if(selectedSHour == selectedEHour && selectedSMinute == selectedEMinute)
+            Toast.makeText(getApplicationContext(),"Please enter valid duration !" , Toast.LENGTH_SHORT).show();
+        else if((selectedDay == currentDay && (selectedMonth-1) == currentMonth && selectedYear == currentYear)  && (currentHour > Integer.parseInt(selectedSHour) || (currentHour == Integer.parseInt(selectedSHour) && currentMinute > Integer.parseInt(selectedSMinute))))
+            Toast.makeText(getApplicationContext(),"Please select valid time !" , Toast.LENGTH_SHORT).show();
         else
         {
             //Toast.makeText(getApplicationContext(),"{\"msg_type\":\"RQ_BK_CNF\",\"year\":\""+selectedYear+"\",\"month\":\"" + selectedMonth+"\",\"day\":\""+selectedDay+"\",\"person\":\""+Person+"\",\"room\":\""+selectedRoom+"\"}",Toast.LENGTH_SHORT).show();
@@ -300,34 +318,63 @@ public class Main2Activity extends AppCompatActivity {
 
     private void setEndTime() {
         int totalMinutes = (s_minutes.getValue() + e_minutes.getValue());
-        int hrs = totalMinutes % 60;
+        int hrs = totalMinutes / 60;
         int minutes = totalMinutes - (hrs * 60);
         selectedEHour = String.valueOf(e_hours.getValue() + Integer.parseInt(startTimes[s_hours.getValue()]) + hrs);
+        Log.d("End Hour", selectedEHour + " " + startTimes[s_hours.getValue()] + " " + e_hours.getValue() + " " + selectedSHour);
         selectedEMinute = String.valueOf(minutes);
     }
 
     public void OnBookingRoom()
     {
         try {
-            JSONObject bookingResponse = new JSONObject(bookRoomResponseString);
+            final JSONObject bookingResponse = new JSONObject(bookRoomResponseString);
 
             Log.d("============",bookRoomResponseString);
             if(bookingResponse.optString("msg_type").equals(bookResponseMessageType) && bookingResponse.optString("result").equals("SUCCESS")) {
                 Toast.makeText(getApplicationContext(), "Booking Successful" , Toast.LENGTH_SHORT).show();
+                //onBackPressed();
+                m2Activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        SweetAlertDialog pDialog = new SweetAlertDialog(m2Activity, SweetAlertDialog.SUCCESS_TYPE)
+                                .setTitleText("Booking Successful!")
+                                .setContentText("Book Id: " + bookingResponse.optString("Book_Id"))
+                                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                    @Override
+                                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                        Main2Activity.super.onBackPressed();
+                                    }
+                                });
+                        pDialog.getProgressHelper().setBarColor(Color.parseColor("#555555"));
+                        pDialog.show();
+                        //Main2Activity.super.onBackPressed();
+                    }
+                });
             }
             else {
                 Toast.makeText(getApplicationContext(), "Booking Failed" , Toast.LENGTH_SHORT).show();
+                m2Activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        new SweetAlertDialog(m2Activity, SweetAlertDialog.WARNING_TYPE)
+                                .setTitleText("Booking Failed!")
+                                .setContentText(bookingResponse.optString("err_msg"))
+                                .show();
+                        //Main2Activity.super.onBackPressed();
+                    }
+                });
             }
         }catch (JSONException e){
             Log.d("---------------------","=============");
             e.printStackTrace();
         }
+        //super.onBackPressed();
 
     }
 
     public void cancel(View v)
     {
-        Toast.makeText(getApplicationContext(),"You have no rights to cancel any events. Sorry!",Toast.LENGTH_SHORT).show();
+        super.onBackPressed();
+        //Toast.makeText(getApplicationContext(),"You have no rights to cancel any events. Sorry!",Toast.LENGTH_SHORT).show();
 
         //cancelDialog.show();
 
@@ -345,6 +392,7 @@ public class Main2Activity extends AppCompatActivity {
             e_hours.setMaxValue(20 - Integer.parseInt(startTimes[s_hours.getValue()]));
         else
             e_hours.setMaxValue(21 - Integer.parseInt(startTimes[s_hours.getValue()]));
+        updateMinutes();
     }
 
     public void updateMinutes()
