@@ -34,6 +34,7 @@
             app:mcv_calendarMode="month"
             app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Headline"
             app:mcv_selectionColor="@color/colorGreen"
+            app:mcv_arrowColor="@color/colorWhite"
             app:mcv_showOtherDates="all" />
 
         <LinearLayout
@@ -60,7 +61,7 @@
                     android:layout_weight="3"
                     android:text="@string/add_event"
                     android:textColor="#aaffffff"
-                    android:textSize="20dp"
+                    android:textSize="10sp"
                     android:textStyle="normal"
                     android:padding="5dp"
                     android:background="@drawable/layout_button"
@@ -70,11 +71,11 @@
                     android:layout_height="0dp"
                     android:layout_weight="2"
                     android:layout_marginTop="2dp"
-                    android:text="Bookings"
+                    android:text="@string/bookings"
                     android:gravity="bottom"
                     android:background="#111111"
                     android:textAlignment="center"
-                    android:textSize="25dp"/>
+                    android:textSize="15sp"/>
 
             </LinearLayout>
 

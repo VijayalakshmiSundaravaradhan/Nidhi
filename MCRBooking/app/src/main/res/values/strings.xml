@@ -12,6 +12,9 @@
     <string name="room">Conference Room</string>
     <string name="book">Book</string>
     <string name="cancel">Cancel</string>
+    <string name="bookings">Bookings</string>
+    <string name="description">Description</string>
+    <string name="back">Back</string>
     <string-array name="confRooms">
         <item>MCR</item>
         <item>CCR</item>

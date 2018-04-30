@@ -149,8 +149,9 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:clickable="false"
-                            android:descendantFocusability="blocksDescendants"></NumberPicker>
+                            android:descendantFocusability="blocksDescendants">
+
+                        </NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -167,7 +168,9 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:descendantFocusability="blocksDescendants"></NumberPicker>
+                            android:descendantFocusability="blocksDescendants">
+
+                        </NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -197,8 +200,9 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:clickable="false"
-                            android:descendantFocusability="blocksDescendants"></NumberPicker>
+                            android:descendantFocusability="blocksDescendants">
+
+                        </NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -215,7 +219,9 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:descendantFocusability="blocksDescendants"></NumberPicker>
+                            android:descendantFocusability="blocksDescendants">
+
+                        </NumberPicker>
 
                         <TextView
                             android:layout_width="0dp"
@@ -298,6 +304,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
+                        android:inputType="textPersonName"
                         android:hint="@string/name_hint"
                         android:background="#42555555"
                         android:textColor="@color/colorWhite"/>
@@ -307,7 +314,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:textColor="#aaffffff"
+                        android:textColor="@color/colorGreen"
                         android:background="#42555555"
                         android:paddingTop="10dp" />
 
@@ -319,11 +326,12 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:hint="Description"
+                    android:inputType="text"
+                    android:hint="@string/description"
                     android:background="#42555555"
                     android:maxLength="100"
                     android:textColor="@color/colorBlack"
-                    android:textSize="25dp" />
+                    android:textSize="25sp" />
 
             </TableLayout>
 
@@ -349,7 +357,7 @@
                     android:onClick="bookRoom"
                     android:text="@string/book"
                     android:textColor="#aaffffff"
-                    android:textSize="20dp"
+                    android:textSize="20sp"
                     android:textStyle="normal" />
 
                 <Button
@@ -362,9 +370,9 @@
                     android:layout_weight="1"
                     android:background="@drawable/layout_button"
                     android:onClick="cancel"
-                    android:text="@string/cancel"
+                    android:text="@string/back"
                     android:textColor="#aaffffff"
-                    android:textSize="20dp"
+                    android:textSize="20sp"
                     android:textStyle="normal"
                     android:visibility="visible" />
 

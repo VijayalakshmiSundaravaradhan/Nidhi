@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -133,59 +134,59 @@ public class Main2Activity extends AppCompatActivity {
         DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
 
         dbReqHandler = new DBReqHandler(getApplicationContext(),reqhandler);
-
-        builder = new AlertDialog.Builder(this);
-        builder.setTitle("Cancel");
-
-        LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
-        View dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null);
-
-        builder.setView(dialogView);
-
-
-        bookingIDWidget = dialogView.findViewById(R.id.bookingID);
-        userWidget = dialogView.findViewById(R.id.user);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                user = userWidget.getText().toString();
-                bookingID = bookingIDWidget.getText().toString();
-
-                if(user.isEmpty())
-                    Toast.makeText(getApplicationContext(),"User name not specified!!" , Toast.LENGTH_SHORT).show();
-                else if(bookingID.isEmpty())
-                    Toast.makeText(getApplicationContext(),"Booking ID not specified!!" , Toast.LENGTH_SHORT).show();
-                else
-                {
-                   // Toast.makeText(getApplicationContext(),"{\"request\":\"RQ_CL\",\"Book_id\":\""+bookingID+"\",\"user\":\""+user+"\"}",Toast.LENGTH_SHORT).show();
-
-                    cancelRequest = new JSONObject();
-
-                    try {
-                        cancelRequest.put("Client_ID","000000");
-                        cancelRequest.put("msg_type", "RQ_CL");
-                        cancelRequest.put("Book_id", bookingID);
-                        cancelRequest.put("user", Person);
-
-                        dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString());
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        cancelDialog = builder.create();
+//
+//        builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Cancel");
+//
+//        LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
+//        View dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null);
+//
+//        builder.setView(dialogView);
+//
+//
+//        bookingIDWidget = dialogView.findViewById(R.id.bookingID);
+//        userWidget = dialogView.findViewById(R.id.user);
+//
+//        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                user = userWidget.getText().toString();
+//                bookingID = bookingIDWidget.getText().toString();
+//
+//                if(user.isEmpty())
+//                    Toast.makeText(getApplicationContext(),"User name not specified!!" , Toast.LENGTH_SHORT).show();
+//                else if(bookingID.isEmpty())
+//                    Toast.makeText(getApplicationContext(),"Booking ID not specified!!" , Toast.LENGTH_SHORT).show();
+//                else
+//                {
+//                   // Toast.makeText(getApplicationContext(),"{\"request\":\"RQ_CL\",\"Book_id\":\""+bookingID+"\",\"user\":\""+user+"\"}",Toast.LENGTH_SHORT).show();
+//
+//                    cancelRequest = new JSONObject();
+//
+//                    try {
+//                        cancelRequest.put("Client_ID","000000");
+//                        cancelRequest.put("msg_type", "RQ_CL");
+//                        cancelRequest.put("Book_id", bookingID);
+//                        cancelRequest.put("user", Person);
+//
+//                        dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,cancelRequest.toString());
+//
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                }
+//
+//            }
+//        });
+//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.cancel();
+//            }
+//        });
+//
+//        cancelDialog = builder.create();
 
         dateText.setText("Current Date : "+currentDateString);
         selectedMonth++;
@@ -296,10 +297,12 @@ public class Main2Activity extends AppCompatActivity {
             //Toast.makeText(getApplicationContext(),"{\"msg_type\":\"RQ_BK_CNF\",\"year\":\""+selectedYear+"\",\"month\":\"" + selectedMonth+"\",\"day\":\""+selectedDay+"\",\"person\":\""+Person+"\",\"room\":\""+selectedRoom+"\"}",Toast.LENGTH_SHORT).show();
 
             bookRequest = new JSONObject();
+            Random r = new Random();
+            String clientID = String.valueOf(r.nextInt(999999 - 100000) + 100000);
 
             try {
                 bookRequest.put("msg_type", "RQ_BK");
-                bookRequest.put("Client_ID", "000000");
+                bookRequest.put("Client_ID", clientID);
                 bookRequest.put("year", selectedYear);
                 bookRequest.put("month", selectedMonthString);
                 bookRequest.put("day", selectedDay);
@@ -308,6 +311,9 @@ public class Main2Activity extends AppCompatActivity {
                 bookRequest.put("ET", selectedEHour+"."+selectedEMinute);
                 bookRequest.put("user", Person);
                 dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString(10));
+
+                Toast.makeText(getApplicationContext(), bookRequest.toString(), Toast.LENGTH_LONG).show();
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -332,7 +338,7 @@ public class Main2Activity extends AppCompatActivity {
 
             Log.d("============",bookRoomResponseString);
             if(bookingResponse.optString("msg_type").equals(bookResponseMessageType) && bookingResponse.optString("result").equals("SUCCESS")) {
-                Toast.makeText(getApplicationContext(), "Booking Successful" , Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Booking Successful" + bookingResponse.optString("Book_Id") , Toast.LENGTH_SHORT).show();
                 //onBackPressed();
                 m2Activity.runOnUiThread(new Runnable() {
                     public void run() {
@@ -352,7 +358,7 @@ public class Main2Activity extends AppCompatActivity {
                 });
             }
             else {
-                Toast.makeText(getApplicationContext(), "Booking Failed" , Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Booking Failed" , Toast.LENGTH_SHORT).show();
                 m2Activity.runOnUiThread(new Runnable() {
                     public void run() {
                         new SweetAlertDialog(m2Activity, SweetAlertDialog.WARNING_TYPE)

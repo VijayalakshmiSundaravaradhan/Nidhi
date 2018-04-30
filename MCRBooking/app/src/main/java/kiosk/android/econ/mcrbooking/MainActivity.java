@@ -1,25 +1,32 @@
 package kiosk.android.econ.mcrbooking;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 
 
 import android.icu.text.SimpleDateFormat;
 import android.nfc.Tag;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.econ.kannan.DBReqHandler;
 
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
 import android.widget.SimpleExpandableListAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -34,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
@@ -43,11 +51,24 @@ import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 public class MainActivity extends AppCompatActivity {
 
     MaterialCalendarView widget;
-
+    AlertDialog.Builder builder;
+    AlertDialog cancelDialog;
     Activity mActivity;
 
     ExpandableListView eventsList;
     SimpleExpandableListAdapter eventsAdapter;
+
+    EditText bookingIDWidget;
+    EditText userWidget;
+
+    String bookingID;
+    String user;
+    String Person;
+
+    String cancelResponseMessageType;
+    String cancelResponseString;
+
+    JSONObject cancelRequest;
 
     int height;
     int width;
@@ -65,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
     String selectedMonthString;
 
     int monthViewed;
-
 
     JSONObject monthRequest;
     String monthResponseString;
@@ -87,14 +107,14 @@ public class MainActivity extends AppCompatActivity {
     JSONObject bookings;
     JSONArray roomsBooked;
 
+    String cancelRoom;
+    String[] roomsActuallyBooked;
+
     final int noOfRooms = 2;
 
     String[] roomNames = new String[noOfRooms];
 
-
     DBReqHandler dbReqHandler;
-
-
 
     public void daySubscribe() {
 
@@ -122,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         {
 
             int[] bookingsInEachRoom;
-            String[] roomsActuallyBooked;
+
 
             //bookingsInEachRoom = new int[noOfRooms];
 
@@ -181,9 +201,9 @@ public class MainActivity extends AppCompatActivity {
 
                             bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
                             List<Map<String, String>> children = new ArrayList<>();
-                            Map<String, String> idChildMap = new HashMap<>();
-                            children.add(idChildMap);
-                            idChildMap.put(NAME, bookingDetails[j][t]);
+//                            Map<String, String> idChildMap = new HashMap<>();
+//                            children.add(idChildMap);
+//                            idChildMap.put(NAME, bookingDetails[j][t]);
                             Log.d("Booking ID : ", bookingDetails[j][t]);
                             t++;
 
@@ -292,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                         mActivity.runOnUiThread(new Runnable() {
                             public void run(){
-                                widget.addDecorator(new EventDecorator(Color.RED, datesHighlighted));
+                                widget.addDecorator(new EventDecorator(Color.RED, 5, datesHighlighted));
                             }
                         });
 
@@ -337,6 +357,12 @@ public class MainActivity extends AppCompatActivity {
                         OnDaySubscription();
                     }
 
+                    if(response.optString("msg_type").equals(cancelResponseMessageType)) {
+                        cancelResponseString = ans;
+                        //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
+                        OnCancelling();
+                    }
+
                 }catch (JSONException e){
                     e.printStackTrace();
                 }
@@ -345,6 +371,19 @@ public class MainActivity extends AppCompatActivity {
             }
     }
 
+    public void OnCancelling()
+    {
+        try {
+            JSONObject cancelResponse = new JSONObject(cancelResponseString);
+            if (cancelResponse.optString("result").equals("success")) {
+                Toast.makeText(getApplicationContext(), "Booking cancelled", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Cancelling failed", Toast.LENGTH_SHORT).show();
+            }
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -367,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
 
         widget.setAllowClickDaysOutsideCurrentMonth(true);
         widget.setTileWidth((width*3)/28);
-
+        widget.setDynamicHeightEnabled(true);
 
         Calendar c = Calendar.getInstance();
         widget.setCurrentDate(c);
@@ -389,23 +428,112 @@ public class MainActivity extends AppCompatActivity {
         selectedDay = currentDay;
         selectedMonthString = months[selectedMonth];
 
-        Log.d("Month :", monthViewed + " " + selectedMonth);
+        Log.d("Month : ", monthViewed + " " + selectedMonth);
 
-
-        monthRequestMessageType = new String("RQ_RD_MN");
-        monthResponseMessageType = new String("RP_RD_MN");
-
-        dayRequestMessageType = new String("RQ_RD_DAY");
-        dayResponseMessageType = new String("RP_RD_DAY");
-
+        monthRequestMessageType = "RQ_RD_MN";
+        monthResponseMessageType = "RP_RD_MN";
+        cancelResponseMessageType = "RP_CN_CNF";
+        dayRequestMessageType = "RQ_RD_DAY";
+        dayResponseMessageType = "RP_RD_DAY";
 
         eventsList = findViewById(R.id.events);
+
+        builder = new AlertDialog.Builder(this);
+        builder.setTitle("Cancel");
+
+        LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
+        View dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null);
+
+        builder.setView(dialogView);
+
+        bookingIDWidget = dialogView.findViewById(R.id.bookingID);
+        userWidget = dialogView.findViewById(R.id.user);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                user = userWidget.getText().toString();
+                bookingID = bookingIDWidget.getText().toString();
+
+                if(user.isEmpty())
+                    Toast.makeText(getApplicationContext(),"User name not specified!!" , Toast.LENGTH_SHORT).show();
+                else if(bookingID.isEmpty())
+                    Toast.makeText(getApplicationContext(),"Booking ID not specified!!" , Toast.LENGTH_SHORT).show();
+                else
+                {
+                    if(selectedYear >= currentYear && selectedMonth >= currentMonth && selectedDay >= currentDay) {
+                        cancelRequest = new JSONObject();
+                        Random r = new Random();
+                        String clientID = String.valueOf(r.nextInt(999999 - 100000) + 100000);
+
+                        try {
+                            cancelRequest.put("Client_ID", clientID);
+                            cancelRequest.put("msg_type", "RQ_CL");
+                            cancelRequest.put("Book_ID", bookingID);
+                            cancelRequest.put("user", user);
+                            cancelRequest.put("year", selectedYear);
+                            cancelRequest.put("month", months[selectedMonth]);
+                            cancelRequest.put("day", selectedDay);
+                            cancelRequest.put("room", cancelRoom);
+
+                            Toast.makeText(getApplicationContext(), cancelRequest.toString(), Toast.LENGTH_SHORT).show();
+
+                            dbReqHandler.dbRequest(dbReqHandler.MSG_ID_CANCEL, cancelRequest.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(),"Please select a valid date ", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        cancelDialog = builder.create();
 
         eventsList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int groupPosition, long id) {
                 //Toast.makeText(getApplicationContext(), "Room Name Is :" + roomNames[groupPosition], Toast.LENGTH_SHORT).show();
-                return false;       }
+                //Data data = eventsAdapter.getGroup(groupPosition);
+                cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
+
+                return false;
+            }
+        });
+
+        eventsList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            int previousGroup = -1;
+
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                if(groupPosition != previousGroup)
+                    eventsList.collapseGroup(previousGroup);
+                previousGroup = groupPosition;
+            }
+        });
+
+        eventsList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
+
+//                cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
+                cancelDialog.show();
+                return false;
+            }
         });
 
 

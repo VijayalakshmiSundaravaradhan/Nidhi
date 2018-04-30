@@ -18,6 +18,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".Main2Activity"></activity>
-        <uses-library android:name="com.econ.kannan.DBReqHandler"/>
+        <!--<uses-library android:name="com.econ.kannan.DBReqHandler" android:required="true"/>-->
     </application>
 </manifest>
