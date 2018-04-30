@@ -21,6 +21,7 @@ import android.view.View;
 import com.econ.kannan.DBReqHandler;
 
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     String bookingID;
     String user;
     String Person;
+    int previousGroup;
 
     String cancelResponseMessageType;
     String cancelResponseString;
@@ -72,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
     int height;
     int width;
+
+    int groupExpanded=0;
 
     private String[][] bookingDetails;
 
@@ -186,42 +190,45 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("No.of bookings : ", String.valueOf(roomsBooked.length()));
 
                         t = 0;
+//                        int i = 0;
                         for (int i = 0; i < roomsBooked.length(); i++) {
                             JSONObject event = roomsBooked.getJSONObject(i);
 
 
-                            bookingDetails[j][t] = event.optString("ST") + " - " + event.optString("ET");
+                            bookingDetails[i][t] = event.optString("ST") + " - " + event.optString("ET");
                             Map<String, String> curGroupMap = new HashMap<>();
                             groupData.add(curGroupMap);
                             curGroupMap.put(NAME, roomsActuallyBooked[j]);
-                            curGroupMap.put("time", bookingDetails[j][t]);
-                            Log.d("Timing: ", bookingDetails[j][t] );
+                            curGroupMap.put("time", bookingDetails[i][t]);
+                            Log.d("Timing: ", bookingDetails[i][t] );
                             t++;
 
+                            bookingDetails[i][t] = roomsActuallyBooked[j];
+                            t++;
 
-                            bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
+                            bookingDetails[i][t] = "Booking ID : " + event.optString("Book_ID");
                             List<Map<String, String>> children = new ArrayList<>();
 //                            Map<String, String> idChildMap = new HashMap<>();
 //                            children.add(idChildMap);
-//                            idChildMap.put(NAME, bookingDetails[j][t]);
-                            Log.d("Booking ID : ", bookingDetails[j][t]);
+//                            idChildMap.put(NAME, bookingDetails[i][t]);
+                            Log.d("Booking ID : ", bookingDetails[i][t]);
                             t++;
 
 
-                            bookingDetails[j][t] = "Person: " + event.optString("user");
+                            bookingDetails[i][t] = "Person: " + event.optString("user");
                             Map<String, String> personChildMap = new HashMap<>();
                             children.add(personChildMap);
-                            personChildMap.put(NAME, bookingDetails[j][t]);
-                            Log.d("Person: ", bookingDetails[j][t]);
+                            personChildMap.put(NAME, bookingDetails[i][t]);
+                            Log.d("Person: ", bookingDetails[i][t]);
                             t++;
 
-                            bookingDetails[j][t] = "Status: " + event.optString("status");
+                            bookingDetails[i][t] = "Status: " + event.optString("status");
                             Map<String, String> statusChildMap = new HashMap<>();
                             children.add(statusChildMap);
-                            statusChildMap.put(NAME, bookingDetails[j][t]);
+                            statusChildMap.put(NAME, bookingDetails[i][t]);
 
                             childData.add(children);
-                            Log.d("Status: ", bookingDetails[j][t]);
+                            Log.d("Status: ", bookingDetails[i][t]);
                             t++;
 
                         }
@@ -436,6 +443,8 @@ public class MainActivity extends AppCompatActivity {
         dayRequestMessageType = "RQ_RD_DAY";
         dayResponseMessageType = "RP_RD_DAY";
 
+        previousGroup = -1;
+
         eventsList = findViewById(R.id.events);
 
         builder = new AlertDialog.Builder(this);
@@ -510,19 +519,36 @@ public class MainActivity extends AppCompatActivity {
                 //Toast.makeText(getApplicationContext(), "Room Name Is :" + roomNames[groupPosition], Toast.LENGTH_SHORT).show();
                 //Data data = eventsAdapter.getGroup(groupPosition);
                 cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
-
+//                Button cancelButton = view.findViewById(R.id.cancelEvent);
+//                cancelButton.setVisibility(View.VISIBLE);
                 return false;
             }
         });
 
         eventsList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            int previousGroup = -1;
 
             @Override
             public void onGroupExpand(int groupPosition) {
-                if(groupPosition != previousGroup)
+                groupExpanded++;
+                Log.d("groupExpand ------ ", "On Expand " + groupExpanded + " " + previousGroup);
+                if(groupPosition != previousGroup && previousGroup >= 0)
                     eventsList.collapseGroup(previousGroup);
                 previousGroup = groupPosition;
+                Button cancelButton = findViewById(R.id.cancelEvent);
+                cancelButton.setVisibility(View.VISIBLE);
+            }
+        });
+
+        eventsList.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+            @Override
+            public void onGroupCollapse(int i) {
+                groupExpanded--;
+                Log.d("groupExpand --------- ", "On Collapse " + groupExpanded);
+                if(groupExpanded == 0) {
+                    Button cancelButton = findViewById(R.id.cancelEvent);
+                    cancelButton.setVisibility(View.INVISIBLE);
+                    previousGroup = -1;
+                }
             }
         });
 
@@ -531,11 +557,10 @@ public class MainActivity extends AppCompatActivity {
             public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
 
 //                cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
-                cancelDialog.show();
+
                 return false;
             }
         });
-
 
 
         DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
@@ -573,6 +598,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void  cancelEvent(View v){
+
+        cancelDialog.show();
     }
 
     public void gotoformActivity(View v)    {

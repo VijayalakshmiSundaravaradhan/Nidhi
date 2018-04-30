@@ -40,7 +40,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:weightSum="8"
+            android:weightSum="9"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
@@ -61,7 +61,7 @@
                     android:layout_weight="3"
                     android:text="@string/add_event"
                     android:textColor="#aaffffff"
-                    android:textSize="10sp"
+                    android:textSize="15sp"
                     android:textStyle="normal"
                     android:padding="5dp"
                     android:background="@drawable/layout_button"
@@ -84,7 +84,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="7"
+                android:divider="@null"
                 android:childIndicator="@null" />
+
+            <Button
+                android:id="@+id/cancelEvent"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:textSize="20sp"
+                android:text="@string/cancel"
+                android:textColor="@color/colorRed"
+                android:onClick="cancelEvent"
+                android:background="@drawable/layout_button"
+                android:focusable="false"
+                android:visibility="invisible"
+                android:layout_gravity="center"
+                android:layout_height="0dp" />
+
 
         </LinearLayout>
 
