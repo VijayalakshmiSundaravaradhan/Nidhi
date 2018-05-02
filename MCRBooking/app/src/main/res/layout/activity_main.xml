@@ -66,16 +66,16 @@
                     android:padding="5dp"
                     android:background="@drawable/layout_button"
                     android:onClick="gotoformActivity" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="2"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/bookings"
-                    android:gravity="bottom"
-                    android:background="#111111"
-                    android:textAlignment="center"
-                    android:textSize="15sp"/>
+                <!--<TextView-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="0dp"-->
+                    <!--android:layout_weight="2"-->
+                    <!--android:layout_marginTop="2dp"-->
+                    <!--android:text="@string/bookings"-->
+                    <!--android:gravity="bottom"-->
+                    <!--android:background="#111111"-->
+                    <!--android:textAlignment="center"-->
+                    <!--android:textSize="15sp"/>-->
 
             </LinearLayout>
 
@@ -84,18 +84,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="7"
+                android:elevation="-2dp"
+                android:translationZ="-5dp"
                 android:divider="@null"
                 android:childIndicator="@null" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/cancelEvent"
                 android:layout_weight="1"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:textSize="20sp"
-                android:text="@string/cancel"
                 android:textColor="@color/colorRed"
                 android:onClick="cancelEvent"
-                android:background="@drawable/layout_button"
+                android:background="@drawable/layout_delete"
                 android:focusable="false"
                 android:visibility="invisible"
                 android:layout_gravity="center"

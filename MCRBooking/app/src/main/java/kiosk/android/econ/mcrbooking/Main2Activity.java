@@ -94,11 +94,11 @@ public class Main2Activity extends AppCompatActivity {
                     OnBookingRoom();
                 }
 
-                if(response.optString("msg_type").equals(cancelResponseMessageType)) {
-                    cancelResponseString = ans;
-                    //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
-                    OnCancelling();
-                }
+//                if(response.optString("msg_type").equals(cancelResponseMessageType)) {
+//                    cancelResponseString = ans;
+//                    //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
+//                    OnCancelling();
+//                }
 
             }catch (JSONException e){
                 e.printStackTrace();
@@ -312,7 +312,7 @@ public class Main2Activity extends AppCompatActivity {
                 bookRequest.put("user", Person);
                 dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString(10));
 
-                Toast.makeText(getApplicationContext(), bookRequest.toString(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(getApplicationContext(), bookRequest.toString(), Toast.LENGTH_LONG).show();
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -342,32 +342,33 @@ public class Main2Activity extends AppCompatActivity {
                 //onBackPressed();
                 m2Activity.runOnUiThread(new Runnable() {
                     public void run() {
-                        SweetAlertDialog pDialog = new SweetAlertDialog(m2Activity, SweetAlertDialog.SUCCESS_TYPE)
+//                        SweetAlertDialog pDialog =
+                                new SweetAlertDialog(m2Activity, SweetAlertDialog.SUCCESS_TYPE)
                                 .setTitleText("Booking Successful!")
-                                .setContentText("Book Id: " + bookingResponse.optString("Book_Id"))
+                                .setContentText("Book Id: " + bookingResponse.optString("Book_Id").substring(0,6))
                                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                                     @Override
                                     public void onClick(SweetAlertDialog sweetAlertDialog) {
                                         Main2Activity.super.onBackPressed();
                                     }
-                                });
-                        pDialog.getProgressHelper().setBarColor(Color.parseColor("#555555"));
-                        pDialog.show();
+                                }).show();
+//                        pDialog.getProgressHelper().setBarColor(Color.parseColor("#555555"));
+//                        pDialog.show();
                         //Main2Activity.super.onBackPressed();
                     }
                 });
             }
             else {
 //                Toast.makeText(getApplicationContext(), "Booking Failed" , Toast.LENGTH_SHORT).show();
-                m2Activity.runOnUiThread(new Runnable() {
-                    public void run() {
+//                m2Activity.runOnUiThread(new Runnable() {
+//                    public void run() {
                         new SweetAlertDialog(m2Activity, SweetAlertDialog.WARNING_TYPE)
                                 .setTitleText("Booking Failed!")
                                 .setContentText(bookingResponse.optString("err_msg"))
                                 .show();
                         //Main2Activity.super.onBackPressed();
-                    }
-                });
+//                    }
+//                });
             }
         }catch (JSONException e){
             Log.d("---------------------","=============");
@@ -385,11 +386,11 @@ public class Main2Activity extends AppCompatActivity {
         //cancelDialog.show();
 
     }
-
-    public void OnCancelling()
-    {
-        Toast.makeText(getApplicationContext(),"Booking cancelled",Toast.LENGTH_SHORT).show();
-    }
+//
+//    public void OnCancelling()
+//    {
+//        Toast.makeText(getApplicationContext(),"Booking cancelled",Toast.LENGTH_SHORT).show();
+//    }
 
     public void updateHours()
     {

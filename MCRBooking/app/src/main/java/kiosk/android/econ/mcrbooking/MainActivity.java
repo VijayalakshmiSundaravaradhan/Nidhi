@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
+import android.widget.ImageButton;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
     String user;
     String Person;
     int previousGroup;
+    EventDecorator mDecorator;
+
+    ImageButton cancelButton;
 
     String cancelResponseMessageType;
     String cancelResponseString;
@@ -96,13 +101,11 @@ public class MainActivity extends AppCompatActivity {
     String monthRequestMessageType;
     String monthResponseMessageType;
     JSONArray daysBooked;
-    int[] daysToHighlight;
+
 
     int currentYear;
     int currentMonth;
     int currentDay;
-
-    HashSet<CalendarDay> datesHighlighted;
 
     JSONObject dayRequest;
     String dayResponseString;
@@ -122,10 +125,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void daySubscribe() {
 
+        eventsList.setVisibility(View.INVISIBLE);
+        cancelButton.setVisibility(View.INVISIBLE);
+
         dayRequest = new JSONObject();
 
         try {
-            dayRequest.put("Client_ID","000000");
+
+            Random r = new Random();
+            String clientID = String.valueOf(r.nextInt(999999 - 100000) + 100000);
+
+            dayRequest.put("Client_ID",clientID);
             dayRequest.put("msg_type", dayRequestMessageType);
             dayRequest.put("year", selectedYear);
             dayRequest.put("month", selectedMonthString);
@@ -282,10 +292,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void monthSubscribe() {
+        Log.d("Mn Sub", "On monthSubscribe-----");
         monthRequest = new JSONObject();
-
+        Log.d("DECORATOR", "---------------");
         try {
-            monthRequest.put("Client_ID", "000000");
+            Random r = new Random();
+            String clientID = String.valueOf(r.nextInt(999999 - 100000) + 100000);
+
+            monthRequest.put("Client_ID", clientID);
             monthRequest.put("msg_type", monthRequestMessageType);
             monthRequest.put("year", selectedYear);
             monthRequest.put("month", months[monthViewed]);
@@ -304,24 +318,33 @@ public class MainActivity extends AppCompatActivity {
     public void OnMonthSubscription(){
         try {
             JSONObject monthResponse = new JSONObject(monthResponseString);
-
+//            mActivity.runOnUiThread(new Runnable() {
+//                public void run() {
+//                    widget.removeDecorators();
+//                }
+//            });
             Log.d("============",monthResponseString);
             if(monthResponse.optString("msg_type").equals(monthResponseMessageType) && monthResponse.optString("result").equals("success")) {
                 daysBooked = monthResponse.optJSONArray("days");
 
-                daysToHighlight = new int[daysBooked.length()];
+//                if(daysBooked.length() != 0) {
+//                    Log.d("============",String.valueOf(daysBooked.length()));
 
-                for (int i = 0; i < daysBooked.length(); i++) {
-                    daysToHighlight[i] = Integer.parseInt(daysBooked.getString(i).toString());
-                    Log.d("daysBooked", daysBooked.getString(i));
-                    Log.d("daysBooked", String.valueOf(monthViewed));
-                    datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed, daysToHighlight[i]));
-                }
-                        mActivity.runOnUiThread(new Runnable() {
-                            public void run(){
-                                widget.addDecorator(new EventDecorator(Color.RED, 5, datesHighlighted));
-                            }
-                        });
+//                    int[] daysToHighlight = new int[daysBooked.length()];
+                    final HashSet<CalendarDay> datesHighlighted = new HashSet<>();
+                    for (int i = 0; i < daysBooked.length(); i++) {
+//                        daysToHighlight[i] = Integer.parseInt(daysBooked.getString(i));
+                        Log.d("daysBooked", daysBooked.getString(i));
+                        Log.d("daysBooked", months[monthViewed]);
+                        datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed, Integer.parseInt(daysBooked.getString(i))));
+                    }
+                    mActivity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            mDecorator = new EventDecorator(Color.RED, 5, datesHighlighted);
+                            widget.addDecorator(mDecorator);
+                        }
+                    });
+//                }
 
             }
         }catch (JSONException e){
@@ -366,7 +389,6 @@ public class MainActivity extends AppCompatActivity {
 
                     if(response.optString("msg_type").equals(cancelResponseMessageType)) {
                         cancelResponseString = ans;
-                        //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
                         OnCancelling();
                     }
 
@@ -381,11 +403,33 @@ public class MainActivity extends AppCompatActivity {
     public void OnCancelling()
     {
         try {
-            JSONObject cancelResponse = new JSONObject(cancelResponseString);
+            final JSONObject cancelResponse = new JSONObject(cancelResponseString);
             if (cancelResponse.optString("result").equals("success")) {
-                Toast.makeText(getApplicationContext(), "Booking cancelled", Toast.LENGTH_SHORT).show();
+
+//                Toast.makeText(getApplicationContext(), "Booking cancelled", Toast.LENGTH_SHORT).show();
+                mActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        widget.removeDecorators();
+                        monthSubscribe();
+                        daySubscribe();
+                        --groupExpanded;
+                        cancelButton.setVisibility(View.INVISIBLE);
+                        SweetAlertDialog pDialog = new SweetAlertDialog(mActivity, SweetAlertDialog.SUCCESS_TYPE)
+                                .setTitleText("Booking Cancelled!")
+                                .setContentText(cancelResponse.optString("err_msg"));
+                        pDialog.getProgressHelper().setBarColor(Color.parseColor("#555555"));
+                        pDialog.show();
+                    }
+                });
             } else {
-                Toast.makeText(getApplicationContext(), "Cancelling failed", Toast.LENGTH_SHORT).show();
+                mActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        new SweetAlertDialog(mActivity, SweetAlertDialog.WARNING_TYPE)
+                                .setTitleText("Cancelling Failed!")
+                                .setContentText(cancelResponse.optString("err_msg"))
+                                .show();
+                    }
+                });
             }
         } catch (JSONException e){
             e.printStackTrace();
@@ -409,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         widget = findViewById(R.id.calendarView);
-        datesHighlighted = new HashSet<>();
+
 
         widget.setAllowClickDaysOutsideCurrentMonth(true);
         widget.setTileWidth((width*3)/28);
@@ -446,6 +490,9 @@ public class MainActivity extends AppCompatActivity {
         previousGroup = -1;
 
         eventsList = findViewById(R.id.events);
+        cancelButton = findViewById(R.id.cancelEvent);
+//        cancelButton.setImageDrawable(android.R.drawable.ic_delete);
+        cancelButton.setImageResource(android.R.drawable.ic_menu_delete);
 
         builder = new AlertDialog.Builder(this);
         builder.setTitle("Cancel");
@@ -479,14 +526,12 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             cancelRequest.put("Client_ID", clientID);
                             cancelRequest.put("msg_type", "RQ_CL");
-                            cancelRequest.put("Book_ID", bookingID);
+                            cancelRequest.put("Book_ID", bookingID+"rm_bk");
                             cancelRequest.put("user", user);
                             cancelRequest.put("year", selectedYear);
                             cancelRequest.put("month", months[selectedMonth]);
                             cancelRequest.put("day", selectedDay);
                             cancelRequest.put("room", cancelRoom);
-
-                            Toast.makeText(getApplicationContext(), cancelRequest.toString(), Toast.LENGTH_SHORT).show();
 
                             dbReqHandler.dbRequest(dbReqHandler.MSG_ID_CANCEL, cancelRequest.toString());
 
@@ -516,8 +561,6 @@ public class MainActivity extends AppCompatActivity {
         eventsList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView expandableListView, View view, int groupPosition, long id) {
-                //Toast.makeText(getApplicationContext(), "Room Name Is :" + roomNames[groupPosition], Toast.LENGTH_SHORT).show();
-                //Data data = eventsAdapter.getGroup(groupPosition);
                 cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
 //                Button cancelButton = view.findViewById(R.id.cancelEvent);
 //                cancelButton.setVisibility(View.VISIBLE);
@@ -529,12 +572,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onGroupExpand(int groupPosition) {
-                groupExpanded++;
+                ++groupExpanded;
                 Log.d("groupExpand ------ ", "On Expand " + groupExpanded + " " + previousGroup);
                 if(groupPosition != previousGroup && previousGroup >= 0)
                     eventsList.collapseGroup(previousGroup);
                 previousGroup = groupPosition;
-                Button cancelButton = findViewById(R.id.cancelEvent);
                 cancelButton.setVisibility(View.VISIBLE);
             }
         });
@@ -544,8 +586,7 @@ public class MainActivity extends AppCompatActivity {
             public void onGroupCollapse(int i) {
                 groupExpanded--;
                 Log.d("groupExpand --------- ", "On Collapse " + groupExpanded);
-                if(groupExpanded == 0) {
-                    Button cancelButton = findViewById(R.id.cancelEvent);
+                if(groupExpanded <= 0) {
                     cancelButton.setVisibility(View.INVISIBLE);
                     previousGroup = -1;
                 }
@@ -565,8 +606,8 @@ public class MainActivity extends AppCompatActivity {
 
         DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
         dbReqHandler = new DBReqHandler(getApplicationContext(),reqhandler);
-        monthSubscribe();
-        daySubscribe();
+//        monthSubscribe();
+//        daySubscribe();
 
         widget.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
@@ -578,7 +619,7 @@ public class MainActivity extends AppCompatActivity {
                 selectedMonthString = months[selectedMonth];
                 selectedYear = date.getYear();
 
-                eventsList.setVisibility(View.INVISIBLE);
+
 
                 //Toast.makeText(getApplicationContext(), "Date Changed : " + selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();
                 daySubscribe();
