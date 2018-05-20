@@ -7,7 +7,7 @@
         android:layout_height="wrap_content"
         android:text="New Text"
         android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:textColor="@color/colorGray"
         android:textSize="16sp"
         android:id="@+id/child_layout" />
