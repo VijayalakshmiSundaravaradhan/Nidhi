@@ -1,11 +1,13 @@
 package kiosk.android.econ.mcrbooking;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 
 
+import android.graphics.drawable.ColorDrawable;
 import android.icu.text.SimpleDateFormat;
 import android.nfc.Tag;
 import android.provider.ContactsContract;
@@ -18,6 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.econ.kannan.DBReqHandler;
 
 import android.widget.AdapterView;
@@ -63,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     EditText bookingIDWidget;
     EditText userWidget;
+    TextView homeText;
 
     String bookingID;
     String user;
@@ -87,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String NAME = "NAME";
     public static final String[] months = new String[]{"jan", "feb", "mar", "apr", "may", "jun",
             "jul", "aug", "sep", "oct", "nov", "dec"};
+    public static final String[] Months = new String[]{"January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"};
 
     int selectedYear;
     int selectedMonth;
@@ -205,40 +213,40 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject event = roomsBooked.getJSONObject(i);
 
 
-                            bookingDetails[i][t] = event.optString("ST") + " - " + event.optString("ET");
+                            bookingDetails[j][t] = event.optString("ST") + " - " + event.optString("ET");
                             Map<String, String> curGroupMap = new HashMap<>();
                             groupData.add(curGroupMap);
                             curGroupMap.put(NAME, roomsActuallyBooked[j]);
-                            curGroupMap.put("time", bookingDetails[i][t]);
-                            Log.d("Timing: ", bookingDetails[i][t] );
+                            curGroupMap.put("time", bookingDetails[j][t]);
+                            Log.d("Timing: ", bookingDetails[j][t] );
                             t++;
 
-                            bookingDetails[i][t] = roomsActuallyBooked[j];
+                            bookingDetails[j][t] = roomsActuallyBooked[j];
                             t++;
 
-                            bookingDetails[i][t] = "Booking ID : " + event.optString("Book_ID");
+                            bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
                             List<Map<String, String>> children = new ArrayList<>();
 //                            Map<String, String> idChildMap = new HashMap<>();
 //                            children.add(idChildMap);
 //                            idChildMap.put(NAME, bookingDetails[i][t]);
-                            Log.d("Booking ID : ", bookingDetails[i][t]);
+                            Log.d("Booking ID : ", bookingDetails[j][t]);
                             t++;
 
 
-                            bookingDetails[i][t] = "Person: " + event.optString("user");
+                            bookingDetails[j][t] = "Person: " + event.optString("user");
                             Map<String, String> personChildMap = new HashMap<>();
                             children.add(personChildMap);
-                            personChildMap.put(NAME, bookingDetails[i][t]);
-                            Log.d("Person: ", bookingDetails[i][t]);
+                            personChildMap.put(NAME, bookingDetails[j][t]);
+                            Log.d("Person: ", bookingDetails[j][t]);
                             t++;
 
-                            bookingDetails[i][t] = "Status: " + event.optString("status");
+                            bookingDetails[j][t] = "Status: " + event.optString("status");
                             Map<String, String> statusChildMap = new HashMap<>();
                             children.add(statusChildMap);
-                            statusChildMap.put(NAME, bookingDetails[i][t]);
+                            statusChildMap.put(NAME, bookingDetails[j][t]);
 
                             childData.add(children);
-                            Log.d("Status: ", bookingDetails[i][t]);
+                            Log.d("Status: ", bookingDetails[j][t]);
                             t++;
 
                         }
@@ -340,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     mActivity.runOnUiThread(new Runnable() {
                         public void run() {
-                            mDecorator = new EventDecorator(Color.RED, 5, datesHighlighted);
+                            mDecorator = new EventDecorator(Color.RED, 1, datesHighlighted);
                             widget.addDecorator(mDecorator);
                         }
                     });
@@ -358,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
     {
         Log.d("debug","onResume" );
         super.onResume();
-        widget.setTileWidth((width*3)/28);
+        widget.setTileWidth((width)/28);
         monthSubscribe();
         daySubscribe();
     }
@@ -456,7 +464,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         widget.setAllowClickDaysOutsideCurrentMonth(true);
-        widget.setTileWidth((width*3)/28);
+        widget.setTileWidth((width)/30);
         widget.setDynamicHeightEnabled(true);
 
         Calendar c = Calendar.getInstance();
@@ -504,6 +512,8 @@ public class MainActivity extends AppCompatActivity {
 
         bookingIDWidget = dialogView.findViewById(R.id.bookingID);
         userWidget = dialogView.findViewById(R.id.user);
+        homeText = (TextView) findViewById(R.id.homeText);
+        homeText.setText("" + Months[currentMonth] + " " + currentDay + ", " + currentYear);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -639,6 +649,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+
+            @Override
+            public void create(SwipeMenu menu) {
+                // create "open" item
+                SwipeMenuItem openItem = new SwipeMenuItem(
+                        getApplicationContext());
+                // set item background
+                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
+                        0xCE)));
+                // set item width
+                openItem.setWidth(dp2px(90));
+                // set item title
+                openItem.setTitle("Open");
+                // set item title fontsize
+                openItem.setTitleSize(18);
+                // set item title font color
+                openItem.setTitleColor(Color.WHITE);
+                // add to menu
+                menu.addMenuItem(openItem);
+
+                // create "delete" item
+                SwipeMenuItem deleteItem = new SwipeMenuItem(
+                        getApplicationContext());
+                // set item background
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
+                        0x3F, 0x25)));
+                // set item width
+                deleteItem.setWidth(dp2px(90));
+                // set a icon
+                deleteItem.setIcon(android.R.drawable.ic_menu_delete);
+                // add to menu
+                menu.addMenuItem(deleteItem);
+            }
+        };
+
     }
 
     public void  cancelEvent(View v){
@@ -664,6 +710,10 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+    }
+    public int dp2px(float dips)
+    {
+        return (int) (dips * this.getResources().getDisplayMetrics().density + 0.5f);
     }
 
 }

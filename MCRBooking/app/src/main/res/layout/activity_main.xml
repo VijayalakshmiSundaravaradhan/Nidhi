@@ -21,26 +21,10 @@
             <!--android:showWeekNumber="false"-->
             <!--android:theme="@style/Theme.Custom" />-->
 
-
-        <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/calendarView"
-            android:layout_width="0dp"
-            android:layout_weight="3"
-            android:layout_height="match_parent"
-            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:mcv_tileWidth="100dp"
-            app:mcv_titleAnimationOrientation="horizontal"
-            app:mcv_calendarMode="month"
-            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:mcv_selectionColor="@color/colorGreen"
-            app:mcv_arrowColor="@color/colorWhite"
-            app:mcv_showOtherDates="all" />
-
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:weightSum="9"
+            android:layout_weight="3"
+            android:weightSum="10"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
@@ -53,29 +37,16 @@
                 android:layout_centerInParent="true"
                 android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/addEvent"
-                    android:layout_gravity="center"
-                    android:layout_width="wrap_content"
+
+                <TextView
+                    android:id="@+id/homeText"
+                    android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="3"
-                    android:text="@string/add_event"
-                    android:textColor="#aaffffff"
-                    android:textSize="15sp"
-                    android:textStyle="normal"
-                    android:padding="5dp"
-                    android:background="@drawable/layout_button"
-                    android:onClick="gotoformActivity" />
-                <!--<TextView-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="0dp"-->
-                    <!--android:layout_weight="2"-->
-                    <!--android:layout_marginTop="2dp"-->
-                    <!--android:text="@string/bookings"-->
-                    <!--android:gravity="bottom"-->
-                    <!--android:background="#111111"-->
-                    <!--android:textAlignment="center"-->
-                    <!--android:textSize="15sp"/>-->
+                    android:layout_weight="5"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/colorWhite"
+                    android:gravity="center"
+                    android:textSize="30dp" />
 
             </LinearLayout>
 
@@ -83,15 +54,16 @@
                 android:id="@+id/events"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="7"
+                android:layout_weight="8"
                 android:elevation="-2dp"
                 android:translationZ="-5dp"
                 android:divider="@null"
                 android:childIndicator="@null" />
 
+
             <ImageButton
                 android:id="@+id/cancelEvent"
-                android:layout_weight="1"
+                android:layout_weight="0"
                 android:layout_width="wrap_content"
                 android:textSize="20sp"
                 android:textColor="@color/colorRed"
@@ -103,6 +75,47 @@
                 android:layout_height="0dp" />
 
 
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:weightSum="3"
+            android:orientation="vertical"
+            android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            >
+            <Button
+                android:id="@+id/addEvent"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_event"
+                android:textColor="#aaffffff"
+                android:textSize="15sp"
+                android:textStyle="normal"
+                android:padding="5dp"
+                android:background="@drawable/layout_button"
+                android:onClick="gotoformActivity" />
+        </LinearLayout>
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_weight="2"
+            android:layout_height="0dp"
+            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:mcv_tileWidth="30dp"
+            app:mcv_tileSize="30dp"
+            app:mcv_titleAnimationOrientation="horizontal"
+            app:mcv_calendarMode="month"
+            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:mcv_selectionColor="@color/colorGreen"
+            app:mcv_arrowColor="@color/colorWhite"
+            app:mcv_showOtherDates="all" />
         </LinearLayout>
 
     </LinearLayout>
