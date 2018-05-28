@@ -1,34 +1,31 @@
 package kiosk.android.econ.mcrbooking;
 
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 
 
-import android.graphics.drawable.ColorDrawable;
-import android.icu.text.SimpleDateFormat;
-import android.nfc.Tag;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.baoyz.swipemenulistview.SwipeMenu;
-import com.baoyz.swipemenulistview.SwipeMenuCreator;
-import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.econ.kannan.DBReqHandler;
 
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
 import android.widget.ImageButton;
@@ -50,13 +47,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener{
 
     MaterialCalendarView widget;
     AlertDialog.Builder builder;
@@ -131,6 +130,11 @@ public class MainActivity extends AppCompatActivity {
 
     DBReqHandler dbReqHandler;
 
+    private RecyclerView recyclerView;
+    private List<Item> eventList;
+    private EventListAdapter mAdapter;
+    private CoordinatorLayout coordinatorLayout;
+
     public void daySubscribe() {
 
         eventsList.setVisibility(View.INVISIBLE);
@@ -202,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
                     List<Map<String, String>> groupData = new ArrayList<>();
                     List<List<Map<String, String>>> childData = new ArrayList<>();
 
+                    JSONArray respArray = new JSONArray();
 
                     for (int j = 0; j < bookings.length(); j++) {
                         roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
@@ -209,49 +214,66 @@ public class MainActivity extends AppCompatActivity {
 
                         t = 0;
 //                        int i = 0;
+                        JSONObject eventEntry = new JSONObject();
                         for (int i = 0; i < roomsBooked.length(); i++) {
                             JSONObject event = roomsBooked.getJSONObject(i);
 
+                            eventEntry.put("room",roomsActuallyBooked[j]);
+                            eventEntry.put("time",event.optString("ST") + " - " + event.optString("ET"));
+                            eventEntry.put("person", event.optString("user"));
 
-                            bookingDetails[j][t] = event.optString("ST") + " - " + event.optString("ET");
+                            bookingDetails[i][t] = event.optString("ST") + " - " + event.optString("ET");
                             Map<String, String> curGroupMap = new HashMap<>();
                             groupData.add(curGroupMap);
                             curGroupMap.put(NAME, roomsActuallyBooked[j]);
-                            curGroupMap.put("time", bookingDetails[j][t]);
-                            Log.d("Timing: ", bookingDetails[j][t] );
+                            curGroupMap.put("time", bookingDetails[i][t]);
+                            Log.d("Timing: ", bookingDetails[i][t] );
                             t++;
 
-                            bookingDetails[j][t] = roomsActuallyBooked[j];
-                            t++;
+//                            bookingDetails[i][t] = roomsActuallyBooked[j];
+//                            t++;
 
-                            bookingDetails[j][t] = "Booking ID : " + event.optString("Book_ID");
+                            bookingDetails[i][t] = "Booking ID : " + event.optString("Book_ID");
                             List<Map<String, String>> children = new ArrayList<>();
 //                            Map<String, String> idChildMap = new HashMap<>();
 //                            children.add(idChildMap);
 //                            idChildMap.put(NAME, bookingDetails[i][t]);
-                            Log.d("Booking ID : ", bookingDetails[j][t]);
+                            Log.d("Booking ID : ", bookingDetails[i][t]);
                             t++;
 
 
-                            bookingDetails[j][t] = "Person: " + event.optString("user");
+                            bookingDetails[i][t] = "Person: " + event.optString("user");
                             Map<String, String> personChildMap = new HashMap<>();
                             children.add(personChildMap);
-                            personChildMap.put(NAME, bookingDetails[j][t]);
-                            Log.d("Person: ", bookingDetails[j][t]);
+                            personChildMap.put(NAME, bookingDetails[i][t]);
+                            Log.d("Person: ", bookingDetails[i][t]);
                             t++;
 
-                            bookingDetails[j][t] = "Status: " + event.optString("status");
+                            bookingDetails[i][t] = "Status: " + event.optString("status");
                             Map<String, String> statusChildMap = new HashMap<>();
                             children.add(statusChildMap);
-                            statusChildMap.put(NAME, bookingDetails[j][t]);
+                            statusChildMap.put(NAME, bookingDetails[i][t]);
 
                             childData.add(children);
-                            Log.d("Status: ", bookingDetails[j][t]);
+                            Log.d("Status: ", bookingDetails[i][t]);
                             t++;
+
+                            respArray.put(eventEntry);
 
                         }
 
                     }
+
+                    List<Item> items = new Gson().fromJson(respArray.toString().toString(), new TypeToken<List<Item>>() {
+                    }.getType());
+
+                    // adding items to cart list
+                    eventList.clear();
+                    eventList.addAll(items);
+
+                    // refreshing recycler view
+                    mAdapter.notifyDataSetChanged();
+
                 // add data in group and child list
                 /*for (int i = 0; i < bookings.length(); i++) {
                     Map<String, String> curGroupMap = new HashMap<>();
@@ -448,6 +470,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        recyclerView = findViewById(R.id.recycler_view);
+        coordinatorLayout = findViewById(R.id.coordinator_layout);
+        eventList = new ArrayList<>();
+        mAdapter = new EventListAdapter(this, eventList);
+
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(mAdapter);
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
         mActivity = this;
 
@@ -649,42 +685,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SwipeMenuCreator creator = new SwipeMenuCreator() {
-
-            @Override
-            public void create(SwipeMenu menu) {
-                // create "open" item
-                SwipeMenuItem openItem = new SwipeMenuItem(
-                        getApplicationContext());
-                // set item background
-                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
-                        0xCE)));
-                // set item width
-                openItem.setWidth(dp2px(90));
-                // set item title
-                openItem.setTitle("Open");
-                // set item title fontsize
-                openItem.setTitleSize(18);
-                // set item title font color
-                openItem.setTitleColor(Color.WHITE);
-                // add to menu
-                menu.addMenuItem(openItem);
-
-                // create "delete" item
-                SwipeMenuItem deleteItem = new SwipeMenuItem(
-                        getApplicationContext());
-                // set item background
-                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
-                        0x3F, 0x25)));
-                // set item width
-                deleteItem.setWidth(dp2px(90));
-                // set a icon
-                deleteItem.setIcon(android.R.drawable.ic_menu_delete);
-                // add to menu
-                menu.addMenuItem(deleteItem);
-            }
-        };
-
     }
 
     public void  cancelEvent(View v){
@@ -696,9 +696,8 @@ public class MainActivity extends AppCompatActivity {
         Intent formActivity = new Intent(this,Main2Activity.class);
 
         Log.d("month issue", currentMonth + " " + currentDay + " " + currentYear + " " + selectedMonth + " " + selectedDay);
-        if(selectedYear >= currentYear && selectedMonth >= currentMonth && selectedDay >= currentDay)
+        if(selectedYear > currentYear || (selectedYear == currentYear && (selectedMonth > currentMonth || (selectedMonth == currentMonth && selectedDay >= currentDay))))
         {
-
             formActivity.putExtra("selectedYear", selectedYear);
             formActivity.putExtra("selectedMonth", selectedMonth);
             formActivity.putExtra("selectedMonthString", selectedMonthString);
@@ -714,6 +713,40 @@ public class MainActivity extends AppCompatActivity {
     public int dp2px(float dips)
     {
         return (int) (dips * this.getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    /**
+     * callback when recycler view is swiped
+     * item will be removed on swiped
+     * undo option will be provided in snackbar to restore the item
+     */
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        if (viewHolder instanceof EventListAdapter.MyViewHolder) {
+            // get the removed item name to display it in snack bar
+            String room = eventList.get(viewHolder.getAdapterPosition()).getRoom();
+
+            // backup of removed item for undo purpose
+            final Item deletedItem = eventList.get(viewHolder.getAdapterPosition());
+            final int deletedIndex = viewHolder.getAdapterPosition();
+
+            // remove the item from recycler view
+            mAdapter.removeItem(viewHolder.getAdapterPosition());
+
+            // showing snack bar with Undo option
+            Snackbar snackbar = Snackbar
+                    .make(coordinatorLayout, room + "Event removed from cart!", Snackbar.LENGTH_LONG);
+            snackbar.setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    // undo is selected, restore the deleted item
+                    mAdapter.restoreItem(deletedItem, deletedIndex);
+                }
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+        }
     }
 
 }

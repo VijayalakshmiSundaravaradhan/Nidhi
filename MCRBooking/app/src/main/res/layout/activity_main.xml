@@ -57,9 +57,20 @@
                 android:layout_weight="8"
                 android:elevation="-2dp"
                 android:translationZ="-5dp"
+                android:visibility="gone"
                 android:divider="@null"
                 android:childIndicator="@null" />
+            <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/coordinator_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="info.androidhive.recyclerviewswipe.MainActivity">
 
+            <include layout="@layout/content_main" />
+
+            </android.support.design.widget.CoordinatorLayout>
 
             <ImageButton
                 android:id="@+id/cancelEvent"
@@ -70,7 +81,7 @@
                 android:onClick="cancelEvent"
                 android:background="@drawable/layout_delete"
                 android:focusable="false"
-                android:visibility="invisible"
+                android:visibility="gone"
                 android:layout_gravity="center"
                 android:layout_height="0dp" />
 

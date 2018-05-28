@@ -15,4 +15,8 @@
     <color name="transparent">#00000000</color>
     <color name="colorGray">#696969</color>
     <color name="black_overlay">#66000000</color>
+
+    <color name="item_name">#535353</color>
+    <color name="description">#a9a9a9</color>
+
 </resources>
