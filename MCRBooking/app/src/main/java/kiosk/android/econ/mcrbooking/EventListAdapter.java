@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -24,15 +25,15 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.MyVi
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView room, time, person;
-        public ImageView thumbnail;
-        public RelativeLayout viewBackground, viewForeground;
+        public RelativeLayout viewBackground;
+        public LinearLayout viewForeground;
+
 
         public MyViewHolder(View view) {
             super(view);
             room = view.findViewById(R.id.roomText);
             time = view.findViewById(R.id.timeText);
             person = view.findViewById(R.id.personText);
-            thumbnail = view.findViewById(R.id.thumbnail);
             viewBackground = view.findViewById(R.id.view_background);
             viewForeground = view.findViewById(R.id.view_foreground);
         }
@@ -47,7 +48,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.MyVi
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.cart_list_item, parent, false);
+                .inflate(R.layout.event_layout, parent, false);
 
         return new MyViewHolder(itemView);
     }

@@ -4,7 +4,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorBlack">#000</color>
-    <color name="colorRed">#8B0000</color>
+    <color name="colorBlackTranslucent">#5d000000</color>
+    <color name="colorRed">#00008B</color>
     <color name="colorOrange">#FF4500</color>
     <color name="colorGreen">#006400</color>
     <color name="colorButtons">#191919</color>
@@ -13,10 +14,9 @@
     <color name="colorBlue">#00008B</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="transparent">#00000000</color>
+    <color name="colorDarkGray">#1d1c1c</color>
+    <color name="colorDarkerGray">#0b0b0b</color>
     <color name="colorGray">#696969</color>
     <color name="black_overlay">#66000000</color>
-
-    <color name="item_name">#535353</color>
-    <color name="description">#a9a9a9</color>
 
 </resources>

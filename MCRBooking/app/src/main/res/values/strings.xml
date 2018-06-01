@@ -4,7 +4,7 @@
     <string name="start_time">Start Time</string>
     <string name="end_time">Duration</string>
     <string name="purpose">Purpose</string>
-    <string name="name_hint">Enter in CAPS</string>
+    <string name="name_hint">Please enter your name</string>
     <string name="purpose_hint">Enter purpose</string>
     <string name="booking_id_hint">Enter booking ID</string>
     <string name="user_hint">Enter user name</string>

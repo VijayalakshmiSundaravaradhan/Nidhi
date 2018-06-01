@@ -29,64 +29,74 @@
             android:orientation="vertical">
 
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/currentDateText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:textAlignment="center"
                 android:layout_weight="1"
-                android:weightSum="5"
-                android:layout_centerInParent="true"
-                android:orientation="vertical">
+                android:elevation="30dp"
+                android:translationZ="20dp"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/colorWhite"
+                android:background="@color/colorDarkGray"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
 
-                <TextView
-                    android:id="@+id/homeText"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="5"
-                    android:layout_marginTop="2dp"
-                    android:textColor="@color/colorWhite"
-                    android:gravity="center"
-                    android:textSize="30dp" />
+            <!--<ExpandableListView-->
+                <!--android:id="@+id/events"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="0dp"-->
+                <!--android:layout_weight="8"-->
+                <!--android:elevation="-2dp"-->
+                <!--android:translationZ="-5dp"-->
+                <!--android:visibility="gone"-->
+                <!--android:divider="@null"-->
+                <!--android:childIndicator="@null" />-->
 
-            </LinearLayout>
-
-            <ExpandableListView
-                android:id="@+id/events"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="8"
-                android:elevation="-2dp"
-                android:translationZ="-5dp"
-                android:visibility="gone"
-                android:divider="@null"
-                android:childIndicator="@null" />
             <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/coordinator_layout"
+                android:id="@+id/eventsList"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="9"
+                android:background="@color/colorDarkerGray"
                 tools:context="info.androidhive.recyclerviewswipe.MainActivity">
 
-            <include layout="@layout/content_main" />
+                <include
+                    layout="@layout/content_main"/>
 
             </android.support.design.widget.CoordinatorLayout>
 
-            <ImageButton
-                android:id="@+id/cancelEvent"
-                android:layout_weight="0"
-                android:layout_width="wrap_content"
-                android:textSize="20sp"
-                android:textColor="@color/colorRed"
-                android:onClick="cancelEvent"
-                android:background="@drawable/layout_delete"
-                android:focusable="false"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:visibility="gone"
-                android:layout_gravity="center"
-                android:layout_height="0dp" />
+                android:layout_weight="3"
+                >
+
+                <include
+                    layout="@layout/video_surface"/>
+
+            </LinearLayout>
+            <!--<ImageButton-->
+                <!--android:id="@+id/cancelEvent"-->
+                <!--android:layout_weight="0"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:textSize="20sp"-->
+                <!--android:textColor="@color/colorRed"-->
+                <!--android:onClick="cancelEvent"-->
+                <!--android:background="@drawable/layout_delete"-->
+                <!--android:focusable="false"-->
+                <!--android:visibility="gone"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:layout_height="0dp" />-->
 
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -97,8 +107,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
             <Button
                 android:id="@+id/addEvent"
                 android:layout_gravity="center"

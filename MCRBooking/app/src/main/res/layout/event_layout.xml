@@ -8,13 +8,13 @@
         android:id="@+id/view_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorRed">
+        android:background="@color/transparent">
 
         <ImageView
             android:id="@+id/delete_icon"
             android:contentDescription="@string/cancel"
-            android:layout_width="@dimen/ic_delete"
-            android:layout_height="@dimen/ic_delete"
+            android:layout_width="@dimen/ic_menu_delete"
+            android:layout_height="@dimen/ic_menu_delete"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/padd_10"
@@ -32,49 +32,52 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/view_foreground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:orientation="horizontal"
+        android:weightSum="7"
+        android:background="@drawable/layout_event"
         android:padding="@dimen/padd_10">
-
-        <!--<ImageView-->
-            <!--android:id="@+id/thumbnail"-->
-            <!--android:layout_width="@dimen/thumbnail"-->
-            <!--android:layout_height="@dimen/thumbnail"-->
-            <!--android:layout_marginRight="@dimen/activity_padding_horizontal"-->
-            <!--android:scaleType="centerCrop" />-->
 
         <TextView
             android:id="@+id/roomText"
-            android:layout_width="@dimen/thumbnail"
-            android:layout_height="@dimen/thumbnail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:layout_weight="1"
             android:layout_marginEnd="@dimen/activity_padding_horizontal"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:maxLines="1"
-            android:textColor="@color/item_name"
-            android:textSize="17sp" />
+            android:textStyle="bold"
+            android:textColor="@color/colorGreen"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="6"
+            android:weightSum="2">
 
-        <TextView
-            android:id="@+id/timeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/roomText"
-            android:layout_marginTop="5dp"
-            android:layout_toEndOf="@id/roomText"
-            android:textColor="@color/description"
-            android:textSize="12sp" />
+            <TextView
+                android:id="@+id/timeText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:textColor="@color/colorWhite"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"  />
 
-        <TextView
-            android:id="@+id/personText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@id/roomText"
-            android:textColor="@color/colorAccent"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/personText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="@color/colorGreen"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 </FrameLayout>
