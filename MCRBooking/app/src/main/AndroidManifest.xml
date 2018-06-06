@@ -11,7 +11,9 @@
         android:icon="@drawable/logo_small"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,7 +22,9 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity android:name=".Main2Activity"></activity>
+        <activity android:name=".Main2Activity"
+            android:configChanges="orientation"
+            android:screenOrientation="landscape"/>
         <!--<uses-library android:name="com.econ.kannan.DBReqHandler" android:required="true"/>-->
     </application>
 </manifest>

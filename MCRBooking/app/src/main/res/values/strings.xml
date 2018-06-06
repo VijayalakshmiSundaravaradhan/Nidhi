@@ -15,8 +15,12 @@
     <string name="bookings">Bookings</string>
     <string name="description">Description</string>
     <string name="back">Back</string>
+    <string name="no_events">No events to display</string>
     <string-array name="confRooms">
-        <item>MCR</item>
-        <item>CCR</item>
+        <item>"Main Conference Room"</item>
+        <item>"Camera Conference Room"</item>
+        <item>"Product Conference Room"</item>
+        <item>"Adjacent Room to MCR"</item>
+        <item>"Reception Area Room"</item>
     </string-array>
 </resources>

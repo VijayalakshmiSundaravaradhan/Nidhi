@@ -14,13 +14,6 @@
         android:background="@drawable/conferencebg_blur"
         android:orientation="horizontal">
 
-        <!--<CalendarView-->
-            <!--android:id="@+id/calendarMain"-->
-            <!--android:layout_width="900dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--android:showWeekNumber="false"-->
-            <!--android:theme="@style/Theme.Custom" />-->
 
         <LinearLayout
             android:layout_width="0dp"
@@ -47,60 +40,44 @@
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
-
-            <!--<ExpandableListView-->
-                <!--android:id="@+id/events"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="0dp"-->
-                <!--android:layout_weight="8"-->
-                <!--android:elevation="-2dp"-->
-                <!--android:translationZ="-5dp"-->
-                <!--android:visibility="gone"-->
-                <!--android:divider="@null"-->
-                <!--android:childIndicator="@null"
-
-                                android:background="@color/colorDarkGray"
-
-                 android:background="@color/colorDarkerGray"/>-->
-
-            <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/eventsList"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="9"
-                android:background="@color/colorBlackTranslucent"
-                tools:context="info.androidhive.recyclerviewswipe.MainActivity">
+                android:layout_weight="9">
 
-                <include
-                    layout="@layout/content_main"/>
+                <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:id="@+id/eventsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorBlackTranslucent"
+                    tools:context="info.androidhive.recyclerviewswipe.MainActivity">
 
-            </android.support.design.widget.CoordinatorLayout>
+                    <include
+                        layout="@layout/content_main"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:visibility="gone"
-                android:layout_weight="3"
-                >
+                </android.support.design.widget.CoordinatorLayout>
 
-                <include
-                    layout="@layout/video_surface"/>
+                <LinearLayout
+                    android:id="@+id/noEvents"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-            </LinearLayout>
-            <!--<ImageButton-->
-                <!--android:id="@+id/cancelEvent"-->
-                <!--android:layout_weight="0"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:textSize="20sp"-->
-                <!--android:textColor="@color/colorRed"-->
-                <!--android:onClick="cancelEvent"-->
-                <!--android:background="@drawable/layout_delete"-->
-                <!--android:focusable="false"-->
-                <!--android:visibility="gone"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:layout_height="0dp" />-->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textAlignment="center"
+                        android:background="@color/transparent"
+                        android:textColor="@color/colorWhite"
+                        android:gravity="center"
+                        android:text="@string/no_events"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+                </LinearLayout>
+
+            </FrameLayout>
 
 
         </LinearLayout>
@@ -108,44 +85,50 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:weightSum="3"
+            android:weightSum="4"
             android:background="@color/colorDarkBlackAlpha"
             android:orientation="vertical"
             android:layout_height="match_parent">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-            <Button
-                android:id="@+id/addEvent"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_event"
-                android:textColor="#aaffffff"
-                android:textSize="15sp"
-                android:textStyle="normal"
-                android:padding="5dp"
-                android:background="@drawable/layout_button"
-                android:onClick="gotoformActivity" />
-        </LinearLayout>
-        <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/calendarView"
-            android:layout_width="match_parent"
-            android:layout_weight="2"
-            android:layout_height="0dp"
-            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:mcv_tileWidth="30dp"
-            app:mcv_tileSize="30dp"
-            app:mcv_titleAnimationOrientation="horizontal"
-            app:mcv_calendarMode="month"
-            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Body1"
-            app:mcv_selectionColor="@color/colorGreen"
-            app:mcv_arrowColor="@color/colorWhite"
-            app:mcv_showOtherDates="all" />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/addEvent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/layout_button"
+                    android:layoutDirection="ltr"
+                    android:onClick="gotoformActivity"
+                    android:text="@string/add_event"
+                    android:textColor="#aaffffff"
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
+            </LinearLayout>
+
+            <com.prolificinteractive.materialcalendarview.MaterialCalendarView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_weight="2"
+                android:layout_height="0dp"
+                app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Body1"
+                app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Body1"
+                app:mcv_tileWidth="30dp"
+                app:mcv_tileSize="30dp"
+                app:mcv_titleAnimationOrientation="horizontal"
+                app:mcv_calendarMode="month"
+                app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Body1"
+                app:mcv_selectionColor="@color/colorGreen"
+                app:mcv_arrowColor="@color/colorWhite"
+                app:mcv_showOtherDates="all" />
+
         </LinearLayout>
 
     </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

@@ -3,7 +3,6 @@ package kiosk.android.econ.mcrbooking;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,11 +30,8 @@ import com.econ.kannan.DBReqHandler;
 
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ExpandableListView;
 
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.SimpleExpandableListAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +43,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +59,7 @@ import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 import jp.wasabeef.blurry.Blurry;
 
 
-public class MainActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, SurfaceHolder.Callback, MediaPlayer.OnPreparedListener {
+public class MainActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener{
 
     MaterialCalendarView widget;
     AlertDialog.Builder builder;
@@ -72,26 +67,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     Activity mActivity;
 
     CoordinatorLayout eventsList;
-//    SimpleExpandableListAdapter eventsAdapter;
+    LinearLayout noEvents;
 
     EditText bookingIDWidget;
     EditText userWidget;
     TextView currentDateText;
-//    TextView cancelUser;
-//    TextView cancelBookingID;
 
     String bookingID;
     String user;
 
-    private MediaPlayer mediaPlayer;
-    private SurfaceHolder vidHolder;
-    private SurfaceView vidSurface;
-    String vidAddress = "https://archive.org/download/ksnn_compilation_master_the_internet/ksnn_compilation_master_the_internet_512kb.mp4";
-
     int previousGroup;
     EventDecorator mDecorator;
-
-//    ImageButton cancelButton;
 
     String cancelResponseMessageType;
     String cancelResponseString;
@@ -101,10 +87,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     int height;
     int width;
 
-    int groupExpanded=0;
-
-
-    private static final String NAME = "NAME";
     public static final String[] months = new String[]{"jan", "feb", "mar", "apr", "may", "jun",
             "jul", "aug", "sep", "oct", "nov", "dec"};
     public static final String[] Months = new String[]{"January", "February", "March", "April", "May", "June",
@@ -139,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     String cancelRoom;
     String[] roomsActuallyBooked;
 
-    final int noOfRooms = 2;
+    final int noOfRooms = 5;
 
     String[] roomNames = new String[noOfRooms];
 
@@ -156,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     public void daySubscribe() {
 
         eventsList.setVisibility(View.INVISIBLE);
-//        cancelButton.setVisibility(View.INVISIBLE);
+        noEvents.setVisibility(View.VISIBLE);
 
         dayRequest = new JSONObject();
 
@@ -171,8 +153,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             dayRequest.put("month", selectedMonthString);
             dayRequest.put("day", selectedDay);
 
-            //Toast.makeText(getApplicationContext(), dayRequest.toString(), Toast.LENGTH_SHORT).show();
-
             dbReqHandler.dbRequest(DBReqHandler.MSG_ID_PARSE_DATE,dayRequest.toString());
 
         }catch (JSONException e){
@@ -185,168 +165,82 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         public void OnDaySubscription()
         {
 
-            int[] bookingsInEachRoom;
+//            int[] bookingsInEachRoom;
 
-
-            //bookingsInEachRoom = new int[noOfRooms];
 
             int t;
 
             try {
                 JSONObject dayResponse = new JSONObject(dayResponseString);
-                Log.d("No.of bookings : ", "On day sub" + dayResponse.optString("Client_ID"));
+//                Log.d("No.of bookings : ", "On day sub" + dayResponse.optString("Client_ID"));
 
                 if (dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("success")) {
 
                     bookings = dayResponse.getJSONObject("bookings");
-                    Log.d("No.of bookings : ", String.valueOf(bookings.length()));
+//                    Log.d("No.of bookings : ", String.valueOf(bookings.length()));
 
                     if (bookings.length() <= 0) {
                         return;
                     }
 
                     t = 0;
-                    bookingsInEachRoom = new int[bookings.length()];
+//                    bookingsInEachRoom = new int[bookings.length()];
                     roomsActuallyBooked = new String[bookings.length()];
 
                     for (int k = 0; k < roomNames.length; k++) {
                         if (bookings.has(roomNames[k])) {
                             roomsBooked = bookings.getJSONArray(roomNames[k]);
-                            Log.d("Actual rooms booked", roomNames[k]);
+//                            Log.d("Actual rooms booked", roomNames[k]);
 
-                            bookingsInEachRoom[t] = roomsBooked.length();
+//                            bookingsInEachRoom[t] = roomsBooked.length();
                             roomsActuallyBooked[t] = roomNames[k];
                             t++;
                         }
                     }
 
-//                    String[][] bookingDetails;
-//                    bookingDetails = new String[bookings.length()][100];
-                    List<Map<String, String>> groupData = new ArrayList<>();
-                    List<List<Map<String, String>>> childData = new ArrayList<>();
 
                     JSONArray respArray = new JSONArray();
 
                     for (int j = 0; j < bookings.length(); j++) {
                         roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
-                        Log.d("No.of bookings : ", String.valueOf(roomsBooked.length()));
-
-                        t = 0;
-//                        int i = 0;
+//                        Log.d("No.of bookings : ", String.valueOf(roomsBooked.length()));
 
                         for (int i = 0; i < roomsBooked.length(); i++) {
                             JSONObject event = roomsBooked.getJSONObject(i);
 
-                            Log.d("room", roomsActuallyBooked[j]);
-                            Log.d("time","Booked from " + event.optString("ST") + " to " + event.optString("ET"));
-                            Log.d("person", "Booked by " + event.optString("user"));
+//                            Log.d("room", roomsActuallyBooked[j]);
+//                            Log.d("time",event.optString("ST") + " - " + event.optString("ET"));
+//                            Log.d("person", "Booked by " + event.optString("user"));
 
                             JSONObject eventEntry = new JSONObject();
                             eventEntry.put("room", roomsActuallyBooked[j]);
-                            eventEntry.put("time","Booked from " + event.optString("ST") + " to " + event.optString("ET"));
+                            eventEntry.put("time",event.optString("ST") + " - " + event.optString("ET"));
                             eventEntry.put("person", "Booked by " + event.optString("user"));
 
                             respArray.put(eventEntry);
 
-//                            bookingDetails[i][t] = event.optString("ST") + " - " + event.optString("ET");
-//                            Map<String, String> curGroupMap = new HashMap<>();
-//                            groupData.add(curGroupMap);
-//                            curGroupMap.put(NAME, roomsActuallyBooked[j]);
-//                            curGroupMap.put("time", bookingDetails[i][t]);
-//                            Log.d("Timing: ", bookingDetails[i][t] );
-//                            t++;
-//
-////                            bookingDetails[i][t] = roomsActuallyBooked[j];
-////                            t++;
-//
-//                            bookingDetails[i][t] = "Booking ID : " + event.optString("Book_ID");
-//                            List<Map<String, String>> children = new ArrayList<>();
-////                            Map<String, String> idChildMap = new HashMap<>();
-////                            children.add(idChildMap);
-////                            idChildMap.put(NAME, bookingDetails[i][t]);
-//                            Log.d("Booking ID : ", bookingDetails[i][t]);
-//                            t++;
-//
-//
-//                            bookingDetails[i][t] = "Person: " + event.optString("user");
-//                            Map<String, String> personChildMap = new HashMap<>();
-//                            children.add(personChildMap);
-//                            personChildMap.put(NAME, bookingDetails[i][t]);
-//                            Log.d("Person: ", bookingDetails[i][t]);
-//                            t++;
-//
-//                            bookingDetails[i][t] = "Status: " + event.optString("status");
-//                            Map<String, String> statusChildMap = new HashMap<>();
-//                            children.add(statusChildMap);
-//                            statusChildMap.put(NAME, bookingDetails[i][t]);
-//
-//                            childData.add(children);
-//                            Log.d("Status: ", bookingDetails[i][t]);
-//                            t++;
-//
-//
                         }
-                        Log.d("List",respArray.toString());
+//                        Log.d("List",respArray.toString());
                     }
 
-                    Log.d("List-- Final",respArray.toString());
+//                    Log.d("List-- Final",respArray.toString());
 
                     List<Item> items = new Gson().fromJson(respArray.toString(), new TypeToken<List<Item>>() {
                     }.getType());
 
-                    // adding items to cart list
+                    // adding items to list
                     eventList.clear();
                     eventList.addAll(items);
 
                     mActivity.runOnUiThread(new Runnable() {
                         public void run() {
-                            Log.d("======= ", "====Setting list");
+//                            Log.d("======= ", "====Setting list");
                             // refreshing recycler view
                             eventsList.setVisibility(View.VISIBLE);
+                            noEvents.setVisibility(View.INVISIBLE);
                             mAdapter.notifyDataSetChanged();
                         }
                     });
-
-
-
-
-
-                // add data in group and child list
-                /*for (int i = 0; i < bookings.length(); i++) {
-                    Map<String, String> curGroupMap = new HashMap<>();
-                    groupData.add(curGroupMap);
-                    curGroupMap.put(NAME, roomNames[i]);
-
-                    List<Map<String, String>> children = new ArrayList<>();
-                    for (int j = 0; j < bookingsInEachRoom[i]; j++) {
-                        Map<String, String> curChildMap = new HashMap<>();
-                        children.add(curChildMap);
-                        curChildMap.put(NAME, bookingDetails[i][j]);
-                    }
-                    childData.add(children);
-                }*/
-                // define arrays for displaying data in Expandable list view
-//                String groupFrom[] = {NAME,"time"};
-//                int groupTo[] = {R.id.parent_layout,R.id.timing};
-//                String childFrom[] = {NAME};
-//                int childTo[] = {R.id.child_layout};
-//
-//                    Log.d("======= ", "====Setting adapter");
-//
-//                // Set up the adapter
-//                    eventsAdapter = new SimpleExpandableListAdapter(this, groupData,
-//                            R.layout.list_group,
-//                            groupFrom, groupTo,
-//                            childData, R.layout.list_child,
-//                            childFrom, childTo);
-//
-//                    mActivity.runOnUiThread(new Runnable() {
-//                        public void run() {
-//                            Log.d("======= ", "====Setting list");
-//                            eventsList.setAdapter(eventsAdapter);
-//                            eventsList.setVisibility(View.VISIBLE);
-//                        }
-//                    });
 
                 }
 
@@ -359,9 +253,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
 
     public void monthSubscribe() {
-        Log.d("Mn Sub", "On monthSubscribe-----");
         monthRequest = new JSONObject();
-        Log.d("DECORATOR", "---------------");
         try {
             Random r = new Random();
             String clientID = String.valueOf(r.nextInt(999999 - 100000) + 100000);
@@ -370,9 +262,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             monthRequest.put("msg_type", monthRequestMessageType);
             monthRequest.put("year", selectedYear);
             monthRequest.put("month", months[monthViewed]);
-            //Toast.makeText(getApplicationContext(), monthRequest.toString(10), Toast.LENGTH_LONG).show();
 
-            Log.d("Month string : ", months[monthViewed]);
+//            Log.d("Month string : ", months[monthViewed]);
             dbReqHandler.dbRequest(DBReqHandler.MSG_ID_PARSE_MONTH,monthRequest.toString());
 
         } catch (JSONException e) {
@@ -394,13 +285,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             if(monthResponse.optString("msg_type").equals(monthResponseMessageType) && monthResponse.optString("result").equals("success")) {
                 daysBooked = monthResponse.optJSONArray("days");
 
-//                if(daysBooked.length() != 0) {
-//                    Log.d("============",String.valueOf(daysBooked.length()));
-
-//                    int[] daysToHighlight = new int[daysBooked.length()];
                     final HashSet<CalendarDay> datesHighlighted = new HashSet<>();
                     for (int i = 0; i < daysBooked.length(); i++) {
-//                        daysToHighlight[i] = Integer.parseInt(daysBooked.getString(i));
                         Log.d("daysBooked", daysBooked.getString(i));
                         Log.d("daysBooked", months[monthViewed]);
                         datesHighlighted.add(CalendarDay.from(selectedYear, monthViewed, Integer.parseInt(daysBooked.getString(i))));
@@ -411,11 +297,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                             widget.addDecorator(mDecorator);
                         }
                     });
-//                }
 
             }
         }catch (JSONException e){
-            Log.d("---------------------","=============");
             e.printStackTrace();
         }
     }
@@ -441,16 +325,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
                     if(response.optString("msg_type").equals(monthResponseMessageType)) {
                         monthResponseString = ans;
-                        //Toast.makeText(MainActivity.this, "Month - " + monthResponseString, Toast.LENGTH_SHORT).show();
-                        //monthResponseString = "{\"client_id\": 432234,\"msg_type\": \"RP_RD_MN\",\"days\": [\"16\",\"17\",\"30\"],\"result\": \"ok\",\"err_code\": 400}";
-
                         OnMonthSubscription();
                     }
 
                     if(response.optString("msg_type").equals(dayResponseMessageType)) {
                         dayResponseString = ans;
-                        //Toast.makeText(MainActivity.this, "Day - " + ans, Toast.LENGTH_SHORT).show();
-                        //dayResponseString = "{\"client_id\": 432234,\"msg_type\":\"RP_RD_DAY\",\"bookings\":{\"MCR\":[{\"Book_ID\":\"B1\",\"ST\":\"11.30\",\"ET\":\"12.0\",\"user\":\"vishnu\", \"status\":\"BUSY\"},{\"Book_ID\":\"B2\",\"ST\":\"12.30\",\"ET\":\"13.0\",\"user\":\"vishnu\",\"status\":\"BOOKED\" }],\"CameraConferenceRoom\": [{\"Book_ID\":\"B3\",\"ST\":\"12.30\",\"ET\":\"13.45\",\"user\":\"vishnu\",\"status\":\"BUSY\"}]},\"result\":\"ok\",\"err_code\":400 }";
                         OnDaySubscription();
                     }
 
@@ -469,18 +348,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
     public void OnCancelling()
     {
-        Log.d("cancel dialogue", "...oncanelling");
         try {
             final JSONObject cancelResponse = new JSONObject(cancelResponseString);
             if (cancelResponse.optString("result").equals("success")) {
 
-//                Toast.makeText(getApplicationContext(), "Booking cancelled", Toast.LENGTH_SHORT).show();
                 mActivity.runOnUiThread(new Runnable() {
                     public void run() {
                         widget.removeDecorators();
-//                        daySubscribe();
-//                        --groupExpanded;
-//                        cancelButton.setVisibility(View.INVISIBLE);
+
                         SweetAlertDialog pDialog = new SweetAlertDialog(mActivity, SweetAlertDialog.SUCCESS_TYPE)
                                 .setTitleText("Booking Cancelled!")
                                 .setContentText(cancelResponse.optString("err_msg"));
@@ -499,7 +374,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                                 .setTitleText("Cancelling Failed!")
                                 .setContentText(cancelResponse.optString("err_msg"))
                                 .show();
-//                        mAdapter.restoreItem(deletedItem, deletedIndex);
                     }
                 });
             }
@@ -523,14 +397,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         decorView.setSystemUiVisibility(uiOptions);
 
         recyclerView = findViewById(R.id.recycler_view);
-//        cancelUser = findViewById(R.id.user);
-//        cancelBookingID = findViewById(R.id.bookingID);
         eventList = new ArrayList<>();
         mAdapter = new EventListAdapter(this, eventList);
-
-        vidSurface = (SurfaceView) findViewById(R.id.surfView);
-        vidHolder = vidSurface.getHolder();
-        vidHolder.addCallback(this);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
@@ -548,13 +416,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
 
-        Log.e("Sc ht px", String.valueOf(height));
-        Log.e("Sc wd px", String.valueOf(width));
-
-
         widget = findViewById(R.id.calendarView);
-
-
         widget.setAllowClickDaysOutsideCurrentMonth(true);
         widget.setTileWidth((width)/30);
         widget.setDynamicHeightEnabled(true);
@@ -566,11 +428,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         currentMonth = c.get(Calendar.MONTH);
         currentDay = c.get(Calendar.DAY_OF_MONTH);
 
-        roomNames[0] = "MCR";
-        roomNames[1] = "CCR";
-//        roomNames[2] = "ProductConferenceRoom";
-//        roomNames[3] = "MCRAdjacentRoom";
-//        roomNames[4] = "ReceptionAreaRoom";
+//        roomNames = this.getResources().getStringArray(R.array.confRooms);
+        roomNames[0] = "Main Conference Room";
+        roomNames[1] = "Camera Conference Room";
+        roomNames[2] = "Product Conference Room";
+        roomNames[3] = "Adjacent Room to MCR";
+        roomNames[4] = "Reception Area Room";
 //        roomNames[5] = "MiscRoom";
 
         selectedMonth = currentMonth;
@@ -589,15 +452,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
         previousGroup = -1;
         eventsList = findViewById(R.id.eventsList);
+        noEvents = findViewById(R.id.noEvents);
         Blurry.with(MainActivity.this)
                 .radius(25)
                 .sampling(1)
                 .async()
                 .animate(500)
                 .onto((ViewGroup) findViewById(R.id.eventsList));
-//        cancelButton = findViewById(R.id.cancelEvent);
-//        cancelButton.setImageDrawable(android.R.drawable.ic_delete);
-//        cancelButton.setImageResource(android.R.drawable.ic_menu_delete);
 
         builder = new AlertDialog.Builder(this);
         builder.setTitle("Cancel");
@@ -661,80 +522,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-//                mActivity.runOnUiThread(new Runnable() {
-//                    public void run() {
-////                        mAdapter.restoreItem(deletedItem, deletedIndex);
-//                    }
-//                });
             }
         });
 
         cancelDialog = builder.create();
-//
-//        eventsList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-//            @Override
-//            public boolean onGroupClick(ExpandableListView expandableListView, View view, int groupPosition, long id) {
-//                cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
-////                Button cancelButton = view.findViewById(R.id.cancelEvent);
-////                cancelButton.setVisibility(View.VISIBLE);
-//                return false;
-//            }
-//        });
-//
-//        eventsList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-//
-//            @Override
-//            public void onGroupExpand(int groupPosition) {
-//                ++groupExpanded;
-//                Log.d("groupExpand ------ ", "On Expand " + groupExpanded + " " + previousGroup);
-//                if(groupPosition != previousGroup && previousGroup >= 0)
-//                    eventsList.collapseGroup(previousGroup);
-//                previousGroup = groupPosition;
-//                cancelButton.setVisibility(View.VISIBLE);
-//            }
-//        });
-//
-//        eventsList.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
-//            @Override
-//            public void onGroupCollapse(int i) {
-//                groupExpanded--;
-//                Log.d("groupExpand --------- ", "On Collapse " + groupExpanded);
-//                if(groupExpanded <= 0) {
-//                    cancelButton.setVisibility(View.INVISIBLE);
-//                    previousGroup = -1;
-//                }
-//            }
-//        });
-//
-//        eventsList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-//            @Override
-//            public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i1, long l) {
-//
-////                cancelRoom = ((TextView) view.findViewById(R.id.parent_layout)).getText().toString();
-//
-//                return false;
-//            }
-//        });
 
-
-        DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
-        dbReqHandler = new DBReqHandler(getApplicationContext(),reqhandler);
-//        monthSubscribe();
-//        daySubscribe();
+        DBReqHandler.IDBReqHandler requestHandler = new reqHandler();
+        dbReqHandler = new DBReqHandler(getApplicationContext(),requestHandler);
 
         widget.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
 
-                //Log.d("day change", ".....");
                 selectedDay = date.getDay();
                 selectedMonth = date.getMonth();
                 selectedMonthString = months[selectedMonth];
                 selectedYear = date.getYear();
 
-
-
-                //Toast.makeText(getApplicationContext(), "Date Changed : " + selectedDay+"-"+selectedMonth+"-"+selectedYear, Toast.LENGTH_SHORT).show();
                 daySubscribe();
             }
 
@@ -744,19 +548,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             @Override
             public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
                 monthViewed = date.getMonth() ;
-                Log.d("Month Changed", monthViewed + " " + date.getMonth());
-
-                //Toast.makeText(getApplicationContext(),"Month Changed : " + monthViewed, Toast.LENGTH_SHORT).show();
+//                Log.d("Month Changed", monthViewed + " " + date.getMonth());
 
                monthSubscribe();
             }
         });
 
-    }
-
-    public void  cancelEvent(View v){
-
-        cancelDialog.show();
     }
 
     public void gotoformActivity(View v)    {
@@ -776,10 +573,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
         }
 
-    }
-    public int dp2px(float dips)
-    {
-        return (int) (dips * this.getResources().getDisplayMetrics().density + 0.5f);
     }
 
     /**
@@ -807,54 +600,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             mAdapter.removeItem(viewHolder.getAdapterPosition());
             mAdapter.restoreItem(deletedItem, deletedIndex);
 
-
-
-            // showing snack bar with Undo option
-//            Snackbar snackbar = Snackbar
-//                    .make(coordinatorLayout, room + "Event removed from cart!", Snackbar.LENGTH_LONG);
-//            snackbar.setAction("UNDO", new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-//                    // undo is selected, restore the deleted item
-//                    mAdapter.restoreItem(deletedItem, deletedIndex);
-//                }
-//            });
-//            snackbar.setActionTextColor(Color.YELLOW);
-//            snackbar.show();
         }
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder arg0) {
-    //setup
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDisplay(vidHolder);
-            mediaPlayer.setDataSource(vidAddress);
-            Log.d("Video", vidAddress);
-            mediaPlayer.prepare();
-            mediaPlayer.setOnPreparedListener(this);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder arg0) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        //start playback
-        mediaPlayer.start();
-    }
 }
