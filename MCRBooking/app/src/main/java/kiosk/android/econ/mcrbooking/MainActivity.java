@@ -29,10 +29,12 @@ import android.view.View;
 
 import com.econ.kannan.DBReqHandler;
 
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +60,8 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
+
+import jp.wasabeef.blurry.Blurry;
 
 
 public class MainActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, SurfaceHolder.Callback, MediaPlayer.OnPreparedListener {
@@ -403,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                     }
                     mActivity.runOnUiThread(new Runnable() {
                         public void run() {
-                            mDecorator = new EventDecorator(Color.BLUE, 3, datesHighlighted);
+                            mDecorator = new EventDecorator(Color.RED, 3, datesHighlighted);
                             widget.addDecorator(mDecorator);
                         }
                     });
@@ -508,6 +512,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        View decorView = getWindow().getDecorView();
+
+        // Hide both the navigation bar and the status bar.
+        // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+        // a general rule, you should design your app to hide the status bar whenever you
+        // hide the navigation bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
 
         recyclerView = findViewById(R.id.recycler_view);
 //        cancelUser = findViewById(R.id.user);
@@ -575,8 +588,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         dayResponseMessageType = "RP_RD_DAY";
 
         previousGroup = -1;
-
         eventsList = findViewById(R.id.eventsList);
+        Blurry.with(MainActivity.this)
+                .radius(25)
+                .sampling(1)
+                .async()
+                .animate(500)
+                .onto((ViewGroup) findViewById(R.id.eventsList));
 //        cancelButton = findViewById(R.id.cancelEvent);
 //        cancelButton.setImageDrawable(android.R.drawable.ic_delete);
 //        cancelButton.setImageResource(android.R.drawable.ic_menu_delete);

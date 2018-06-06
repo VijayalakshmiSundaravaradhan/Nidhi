@@ -41,4 +41,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation files('libs/myjsondblibrary.jar')
     implementation 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'jp.wasabeef:blurry:2.1.1'
 }

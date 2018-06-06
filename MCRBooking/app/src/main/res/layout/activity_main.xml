@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:weightSum="4"
+        android:background="@drawable/conferencebg_blur"
         android:orientation="horizontal">
 
         <!--<CalendarView-->
@@ -25,6 +26,10 @@
             android:layout_width="0dp"
             android:layout_weight="3"
             android:weightSum="10"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
@@ -37,9 +42,8 @@
                 android:layout_weight="1"
                 android:elevation="30dp"
                 android:translationZ="20dp"
-                android:layout_marginTop="2dp"
+                android:background="@color/colorDarkBlackAlpha"
                 android:textColor="@color/colorWhite"
-                android:background="@color/colorDarkGray"
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
@@ -53,7 +57,11 @@
                 <!--android:translationZ="-5dp"-->
                 <!--android:visibility="gone"-->
                 <!--android:divider="@null"-->
-                <!--android:childIndicator="@null" />-->
+                <!--android:childIndicator="@null"
+
+                                android:background="@color/colorDarkGray"
+
+                 android:background="@color/colorDarkerGray"/>-->
 
             <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -62,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="9"
-                android:background="@color/colorDarkerGray"
+                android:background="@color/colorBlackTranslucent"
                 tools:context="info.androidhive.recyclerviewswipe.MainActivity">
 
                 <include
@@ -101,6 +109,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:weightSum="3"
+            android:background="@color/colorDarkBlackAlpha"
             android:orientation="vertical"
             android:layout_height="match_parent">
         <LinearLayout
