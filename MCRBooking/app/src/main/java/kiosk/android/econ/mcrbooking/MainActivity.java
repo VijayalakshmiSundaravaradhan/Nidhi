@@ -2,6 +2,7 @@ package kiosk.android.econ.mcrbooking;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.CountDownTimer;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -135,6 +136,15 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     Item deletedItem;
     int deletedIndex;
 
+//    CountDownTimer inActivityTimer;
+
+//    @Override
+//    public void onUserInteraction() {
+//        super.onUserInteraction();
+//        inActivityTimer.cancel();
+//        inActivityTimer.start();
+//    }
+
     public void daySubscribe() {
 
         eventsList.setVisibility(View.INVISIBLE);
@@ -213,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 //                            Log.d("person", "Booked by " + event.optString("user"));
 
                             JSONObject eventEntry = new JSONObject();
-                            eventEntry.put("room", roomsActuallyBooked[j]);
+                            eventEntry.put("room", "Booked at " + roomsActuallyBooked[j]);
                             eventEntry.put("time",event.optString("ST") + " - " + event.optString("ET"));
                             eventEntry.put("person", "Booked by " + event.optString("user"));
 
@@ -293,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                     }
                     mActivity.runOnUiThread(new Runnable() {
                         public void run() {
-                            mDecorator = new EventDecorator(Color.RED, 3, datesHighlighted);
+                            mDecorator = new EventDecorator(Color.parseColor("#FF4500"), 3, datesHighlighted);
                             widget.addDecorator(mDecorator);
                         }
                     });
@@ -388,6 +398,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         setContentView(R.layout.activity_main);
         View decorView = getWindow().getDecorView();
 
+
+//        inActivityTimer = new CountDownTimer(300000, 300000) {
+//            @Override
+//            public void onTick(long l) {
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                Toast.makeText(getApplicationContext(),"5 mins of inactivity", Toast.LENGTH_LONG).show();
+//            }
+//        }.start();
+
         // Hide both the navigation bar and the status bar.
         // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
         // a general rule, you should design your app to hide the status bar whenever you
@@ -428,12 +450,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         currentMonth = c.get(Calendar.MONTH);
         currentDay = c.get(Calendar.DAY_OF_MONTH);
 
-//        roomNames = this.getResources().getStringArray(R.array.confRooms);
-        roomNames[0] = "Main Conference Room";
-        roomNames[1] = "Camera Conference Room";
-        roomNames[2] = "Product Conference Room";
-        roomNames[3] = "Adjacent Room to MCR";
-        roomNames[4] = "Reception Area Room";
+        roomNames = this.getResources().getStringArray(R.array.confRooms);
+//        roomNames[0] = "Main Conference Room";
+//        roomNames[1] = "Camera Conference Room";
+//        roomNames[2] = "Product Conference Room";
+//        roomNames[3] = "Adjacent Room to MCR";
+//        roomNames[4] = "Reception Area Room";
 //        roomNames[5] = "MiscRoom";
 
         selectedMonth = currentMonth;
@@ -461,7 +483,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                 .onto((ViewGroup) findViewById(R.id.eventsList));
 
         builder = new AlertDialog.Builder(this);
-        builder.setTitle("Cancel");
+        builder.setTitle("Cancel Event");
 
         LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
         View dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null);

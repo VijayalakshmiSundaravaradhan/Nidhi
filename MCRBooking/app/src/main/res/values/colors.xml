@@ -13,6 +13,8 @@
     <color name="colorGreenTranslucent">#66006400</color>
     <color name="colorRedTranslucent">#448B0000</color>
     <color name="colorBlue">#00008B</color>
+    <color name="colorSeaBlue">#006994</color>
+    <color name="colorSkyBlue">#87CEFA</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="colorDarkGray">#1d1c1c</color>

@@ -26,8 +26,8 @@
             android:layout_centerVertical="true"
             android:layout_marginEnd="@dimen/padd_10"
             android:layout_toStartOf="@id/delete_icon"
-            android:text="Delete Event"
-            android:textColor="@color/colorBlue"
+            android:text="@string/cancel"
+            android:textColor="@color/colorWhite"
             android:textSize="13sp" />
 
     </RelativeLayout>
@@ -50,8 +50,8 @@
             android:layout_marginEnd="@dimen/activity_padding_horizontal"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
             android:textStyle="bold"
+            android:maxLines="1"
             android:textColor="@color/colorOrange"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
         <LinearLayout
@@ -66,17 +66,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:textColor="@color/colorWhite"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"  />
+                android:textSize="13sp"
+                android:textColor="@color/colorWhite" />
 
             <TextView
                 android:id="@+id/personText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textColor="@color/colorGreen"
-                android:textStyle="bold" />
+                android:textSize="13sp"
+                android:textColor="#169825" />
         </LinearLayout>
 
     </LinearLayout>

@@ -11,7 +11,7 @@
     <string name="name">Your Name</string>
     <string name="room">Conference Room</string>
     <string name="book">Book</string>
-    <string name="cancel">Delete Event</string>
+    <string name="cancel">Swipe to</string>
     <string name="bookings">Bookings</string>
     <string name="description">Description</string>
     <string name="back">Back</string>
