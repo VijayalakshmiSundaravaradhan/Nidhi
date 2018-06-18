@@ -60,9 +60,6 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.MyVi
         holder.time.setText(item.getTime());
         holder.person.setText(item.getPerson());
 
-//        Glide.with(context)
-//                .load(item.getThumbnail())
-//                .into(holder.thumbnail);
     }
 
     @Override

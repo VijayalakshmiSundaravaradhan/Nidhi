@@ -16,6 +16,7 @@
     <string name="description">Description</string>
     <string name="back">Back</string>
     <string name="no_events">No events to display</string>
+    <string name="refresh">Click to refresh</string>
     <string-array name="confRooms">
         <item>"Main Conference Room"</item>
         <item>"Camera Conference Room"</item>

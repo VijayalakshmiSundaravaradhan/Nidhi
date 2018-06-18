@@ -29,60 +29,50 @@ import java.util.Random;
 
 public class Main2Activity extends AppCompatActivity {
 
-    String currentDateString;
     TextView dateText;
     TextView selectedDateText;
     Activity m2Activity;
-
     NumberPicker s_hours;
     NumberPicker s_minutes;
     NumberPicker e_hours;
     NumberPicker e_minutes;
-
     EditText nameInput;
-    EditText bookingIDWidget;
-    EditText userWidget;
     Spinner room;
-
-    String[] startTimes = new String[12];
 
     int selectedYear;
     int selectedMonth;
     int selectedDay;
+    final int MAX_MINUTES = 60;
+    final int MIN_MINUTES = 0;
+    final int MAX_HOURS = 20;
+    final int MIN_HOURS = 0;
 
-    String selectedMonthString;
 
     String selectedRoom;
     String Person;
     String bookingID;
     String user;
+    String currentDateString;
+    String selectedMonthString;
 
     String bookResponseMessageType;
-    String cancelResponseMessageType;
-
     String bookRoomResponseString;
-    String cancelResponseString;
 
     JSONObject bookRequest;
-    JSONObject cancelRequest;
 
     String selectedSHour;
     String selectedSMinute;
-
     String selectedEHour;
     String selectedEMinute;
+    String[] startTimes = new String[12];
 
-    AlertDialog.Builder builder;
-    AlertDialog cancelDialog;
     DBReqHandler dbReqHandler;
-
 
     public class reqHandler implements DBReqHandler.IDBReqHandler {
 
         @Override
         public void testCallback(String ans)
         {
-            Log.d("On callback", "-----");
             JSONObject response;
             try {
                 response = new JSONObject(ans);
@@ -90,21 +80,12 @@ public class Main2Activity extends AppCompatActivity {
 
                 if(response.optString("msg_type").equals(bookResponseMessageType)) {
                     bookRoomResponseString = ans;
-                    //bookRoomResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
                     OnBookingRoom();
                 }
-
-//                if(response.optString("msg_type").equals(cancelResponseMessageType)) {
-//                    cancelResponseString = ans;
-//                    //cancelResponseString = "{\"client_id\": 000000,\"msg_type\": \"RP_BK_CNF\",\"Book_id\": \"B1\",\"result\": \"ok\",\"err_code\": 400}";
-//                    OnCancelling();
-//                }
 
             }catch (JSONException e){
                 e.printStackTrace();
             }
-
-//            Toast.makeText(getApplicationContext(), "SM IS" + ans, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -117,7 +98,6 @@ public class Main2Activity extends AppCompatActivity {
         dateText = findViewById(R.id.dateText);
         selectedDateText = findViewById(R.id.selectedDateText);
         bookResponseMessageType = "RP_BK_CNF";
-        cancelResponseMessageType = "RP_CL";
 
         s_hours = findViewById(R.id.shours);
         s_minutes= findViewById(R.id.sminutes);
@@ -131,66 +111,15 @@ public class Main2Activity extends AppCompatActivity {
         selectedMonthString = getIntent().getStringExtra("selectedMonthString");
         selectedDay = getIntent().getIntExtra("selectedDay",0);
 
-        DBReqHandler.IDBReqHandler reqhandler = new reqHandler();
+        DBReqHandler.IDBReqHandler requestHandler = new reqHandler();
 
-        dbReqHandler = new DBReqHandler(getApplicationContext(),reqhandler);
-//
-//        builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Cancel");
-//
-//        LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
-//        View dialogView = layoutInflater.inflate(R.layout.cancel_dialog, null);
-//
-//        builder.setView(dialogView);
-//
-//
-//        bookingIDWidget = dialogView.findViewById(R.id.bookingID);
-//        userWidget = dialogView.findViewById(R.id.user);
-//
-//        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                user = userWidget.getText().toString();
-//                bookingID = bookingIDWidget.getText().toString();
-//
-//                if(user.isEmpty())
-//                    Toast.makeText(getApplicationContext(),"User name not specified!!" , Toast.LENGTH_SHORT).show();
-//                else if(bookingID.isEmpty())
-//                    Toast.makeText(getApplicationContext(),"Booking ID not specified!!" , Toast.LENGTH_SHORT).show();
-//                else
-//                {
-//                   // Toast.makeText(getApplicationContext(),"{\"request\":\"RQ_CL\",\"Book_id\":\""+bookingID+"\",\"user\":\""+user+"\"}",Toast.LENGTH_SHORT).show();
-//
-//                    cancelRequest = new JSONObject();
-//
-//                    try {
-//                        cancelRequest.put("Client_ID","000000");
-//                        cancelRequest.put("msg_type", "RQ_CL");
-//                        cancelRequest.put("Book_id", bookingID);
-//                        cancelRequest.put("user", Person);
-//
-//                        dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,cancelRequest.toString());
-//
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-//
-//            }
-//        });
-//        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.cancel();
-//            }
-//        });
-//
-//        cancelDialog = builder.create();
+        dbReqHandler = new DBReqHandler(getApplicationContext(),requestHandler);
 
-        dateText.setText("Current Date : "+currentDateString);
+        String dateString = "Today's date : " + currentDateString;
+        dateText.setText(dateString);
         selectedMonth++;
-        selectedDateText.setText("Selected Date : "+selectedDay+"-"+selectedMonth+"-"+selectedYear);
+        dateString = "Selected Date : "+selectedDay+"-"+selectedMonth+"-"+selectedYear;
+        selectedDateText.setText(dateString);
 
         room = findViewById(R.id.spinner);
         final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.confRooms, android.R.layout.simple_spinner_item);
@@ -227,8 +156,7 @@ public class Main2Activity extends AppCompatActivity {
         selectedSHour = startTimes[s_hours.getValue()];
         selectedSMinute = String.valueOf(s_minutes.getValue());
         //setEndTime();
-
-
+        
         updateHours();
         updateMinutes();
 
@@ -283,19 +211,16 @@ public class Main2Activity extends AppCompatActivity {
         int currentMonth = c.get(Calendar.MONTH);
         int currentDay = c.get(Calendar.DAY_OF_MONTH);
         int currentHour = c.get(Calendar.HOUR_OF_DAY);
-        Log.d("current hour", " " + currentHour);
         int currentMinute = c.get(Calendar.MINUTE);
         Person = nameInput.getText().toString().toUpperCase();
         if(Person.isEmpty())
             Toast.makeText(getApplicationContext(),"Please enter your good name !" , Toast.LENGTH_SHORT).show();
-        else if(selectedSHour == selectedEHour && selectedSMinute == selectedEMinute)
+        else if(selectedSHour.equals(selectedEHour) && selectedSMinute.equals(selectedEMinute))
             Toast.makeText(getApplicationContext(),"Please enter valid duration !" , Toast.LENGTH_SHORT).show();
         else if((selectedDay == currentDay && (selectedMonth-1) == currentMonth && selectedYear == currentYear)  && (currentHour > Integer.parseInt(selectedSHour) || (currentHour == Integer.parseInt(selectedSHour) && currentMinute > Integer.parseInt(selectedSMinute))))
             Toast.makeText(getApplicationContext(),"Please select valid time !" , Toast.LENGTH_SHORT).show();
         else
         {
-            //Toast.makeText(getApplicationContext(),"{\"msg_type\":\"RQ_BK_CNF\",\"year\":\""+selectedYear+"\",\"month\":\"" + selectedMonth+"\",\"day\":\""+selectedDay+"\",\"person\":\""+Person+"\",\"room\":\""+selectedRoom+"\"}",Toast.LENGTH_SHORT).show();
-
             bookRequest = new JSONObject();
             Random r = new Random();
             String clientID = String.valueOf(r.nextInt(999999 - 100000) + 100000);
@@ -310,24 +235,20 @@ public class Main2Activity extends AppCompatActivity {
                 bookRequest.put("ST", selectedSHour+"."+selectedSMinute);
                 bookRequest.put("ET", selectedEHour+"."+selectedEMinute);
                 bookRequest.put("user", Person);
-                dbReqHandler.dbRequest(dbReqHandler.MSG_ID_ADD,bookRequest.toString(10));
-
-//                Toast.makeText(getApplicationContext(), bookRequest.toString(), Toast.LENGTH_LONG).show();
+                dbReqHandler.dbRequest(DBReqHandler.MSG_ID_ADD,bookRequest.toString(10));
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
 
         }
     }
 
     private void setEndTime() {
         int totalMinutes = (s_minutes.getValue() + e_minutes.getValue());
-        int hrs = totalMinutes / 60;
-        int minutes = totalMinutes - (hrs * 60);
+        int hrs = totalMinutes / MAX_MINUTES;
+        int minutes = totalMinutes - (hrs * MAX_MINUTES);
         selectedEHour = String.valueOf(e_hours.getValue() + Integer.parseInt(startTimes[s_hours.getValue()]) + hrs);
-        Log.d("End Hour", selectedEHour + " " + startTimes[s_hours.getValue()] + " " + e_hours.getValue() + " " + selectedSHour);
         selectedEMinute = String.valueOf(minutes);
     }
 
@@ -335,14 +256,10 @@ public class Main2Activity extends AppCompatActivity {
     {
         try {
             final JSONObject bookingResponse = new JSONObject(bookRoomResponseString);
-
-            Log.d("============",bookRoomResponseString);
             if(bookingResponse.optString("msg_type").equals(bookResponseMessageType) && bookingResponse.optString("result").equals("SUCCESS")) {
-//                Toast.makeText(getApplicationContext(), "Booking Successful" + bookingResponse.optString("Book_Id") , Toast.LENGTH_SHORT).show();
-                //onBackPressed();
+
                 m2Activity.runOnUiThread(new Runnable() {
                     public void run() {
-//                        SweetAlertDialog pDialog =
                                 new SweetAlertDialog(m2Activity, SweetAlertDialog.SUCCESS_TYPE)
                                 .setTitleText("Booking Successful!")
                                 .setContentText("Book Id: " + bookingResponse.optString("Book_Id").substring(0,6))
@@ -352,71 +269,45 @@ public class Main2Activity extends AppCompatActivity {
                                         Main2Activity.super.onBackPressed();
                                     }
                                 }).show();
-//                        pDialog.getProgressHelper().setBarColor(Color.parseColor("#555555"));
-//                        pDialog.show();
-                        //Main2Activity.super.onBackPressed();
                     }
                 });
             }
             else {
-//                Toast.makeText(getApplicationContext(), "Booking Failed" , Toast.LENGTH_SHORT).show();
-//                m2Activity.runOnUiThread(new Runnable() {
-//                    public void run() {
                         new SweetAlertDialog(m2Activity, SweetAlertDialog.WARNING_TYPE)
                                 .setTitleText("Booking Failed!")
                                 .setContentText(bookingResponse.optString("err_msg"))
                                 .show();
-                        //Main2Activity.super.onBackPressed();
-//                    }
-//                });
             }
         }catch (JSONException e){
-            Log.d("---------------------","=============");
             e.printStackTrace();
         }
-        //super.onBackPressed();
-
     }
-
-    public void cancel(View v)
-    {
-        super.onBackPressed();
-        //Toast.makeText(getApplicationContext(),"You have no rights to cancel any events. Sorry!",Toast.LENGTH_SHORT).show();
-
-        //cancelDialog.show();
-
-    }
-//
-//    public void OnCancelling()
-//    {
-//        Toast.makeText(getApplicationContext(),"Booking cancelled",Toast.LENGTH_SHORT).show();
-//    }
 
     public void updateHours()
     {
-        e_hours.setMinValue(0);
-        if(s_minutes.getValue() != 0)
-            e_hours.setMaxValue(20 - Integer.parseInt(startTimes[s_hours.getValue()]));
+        e_hours.setMinValue(MIN_HOURS);
+        if(s_minutes.getValue() != MIN_MINUTES)
+            e_hours.setMaxValue(MAX_HOURS - Integer.parseInt(startTimes[s_hours.getValue()]));
         else
-            e_hours.setMaxValue(21 - Integer.parseInt(startTimes[s_hours.getValue()]));
+            e_hours.setMaxValue(MAX_HOURS + 1 - Integer.parseInt(startTimes[s_hours.getValue()]));
         updateMinutes();
     }
 
     public void updateMinutes()
     {
 
-        if((Integer.parseInt(startTimes[s_hours.getValue()]) + e_hours.getValue()) < 20)
+        if((Integer.parseInt(startTimes[s_hours.getValue()]) + e_hours.getValue()) < MAX_HOURS)
         {
-            e_minutes.setMinValue(0);
-            e_minutes.setMaxValue(59);
+            e_minutes.setMinValue(MIN_MINUTES);
+            e_minutes.setMaxValue(MAX_MINUTES - 1);
         }
-        else if((Integer.parseInt(startTimes[s_hours.getValue()]) + e_hours.getValue()) == 20)
+        else if((Integer.parseInt(startTimes[s_hours.getValue()]) + e_hours.getValue()) == MAX_HOURS)
         {
-            e_minutes.setMinValue(0);
-            if(s_minutes.getValue() == 0)
-                e_minutes.setMaxValue(59 - s_minutes.getValue());
+            e_minutes.setMinValue(MIN_MINUTES);
+            if(s_minutes.getValue() == MIN_MINUTES)
+                e_minutes.setMaxValue(MAX_MINUTES - 1 - s_minutes.getValue());
             else
-                e_minutes.setMaxValue(60 - s_minutes.getValue());
+                e_minutes.setMaxValue(MAX_MINUTES - s_minutes.getValue());
         }
         else
         {
@@ -428,4 +319,8 @@ public class Main2Activity extends AppCompatActivity {
         setEndTime();
     }
 
+    public void goBack(View v)
+     {
+        super.onBackPressed();
+     }
 }

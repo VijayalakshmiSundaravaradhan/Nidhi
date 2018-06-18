@@ -1,8 +1,5 @@
 package kiosk.android.econ.mcrbooking;
 
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -24,14 +21,11 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 
 import com.econ.kannan.DBReqHandler;
 
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.EditText;
 
 import android.widget.LinearLayout;
@@ -48,7 +42,6 @@ import java.util.Calendar;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -64,107 +57,84 @@ import jp.wasabeef.blurry.Blurry;
 
 public class MainActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener{
 
-    MaterialCalendarView widget;
-    AlertDialog.Builder builder;
-    AlertDialog cancelDialog;
-    Activity mActivity;
-
-    CoordinatorLayout eventsList;
-    LinearLayout noEvents;
 
     EditText bookingIDWidget;
     EditText userWidget;
     TextView currentDateText;
 
-    String bookingID;
-    String user;
-
-    int previousGroup;
-    EventDecorator mDecorator;
-
-    String cancelResponseMessageType;
-    String cancelResponseString;
-
-    JSONObject cancelRequest;
-
-    int height;
-    int width;
+    int screenHeight;
+    int screenWidth;
 
     public static final String[] months = new String[]{"jan", "feb", "mar", "apr", "may", "jun",
             "jul", "aug", "sep", "oct", "nov", "dec"};
     public static final String[] Months = new String[]{"January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"};
+    String selectedMonthString;
 
     int selectedYear;
     int selectedMonth;
     int selectedDay;
-
-    String selectedMonthString;
-
-    int monthViewed;
-
-    JSONObject monthRequest;
-    String monthResponseString;
-    String monthRequestMessageType;
-    String monthResponseMessageType;
-    JSONArray daysBooked;
-
-
     int currentYear;
     int currentMonth;
     int currentDay;
+    int monthViewed;
 
+    JSONArray daysBooked;
+
+    JSONObject cancelRequest;
+    JSONObject monthRequest;
     JSONObject dayRequest;
-    String dayResponseString;
-    String dayRequestMessageType;
-    String dayResponseMessageType;
     JSONObject bookings;
     JSONArray roomsBooked;
 
+    String dayResponseString;
+    String dayRequestMessageType;
+    String dayResponseMessageType;
+    String monthResponseString;
+    String monthRequestMessageType;
+    String monthResponseMessageType;
+    String cancelResponseMessageType;
+    String cancelResponseString;
+
     String cancelRoom;
     String[] roomsActuallyBooked;
+    String bookingID;
+    String user;
 
     final int noOfRooms = 5;
-
     String[] roomNames = new String[noOfRooms];
 
-    DBReqHandler dbReqHandler;
-
-    private RecyclerView recyclerView;
     private List<Item> eventList;
     private EventListAdapter mAdapter;
-
-    int eventNumber = 0;
+    MaterialCalendarView widget;
+    AlertDialog.Builder builder;
+    AlertDialog cancelDialog;
+    EventDecorator mDecorator;
+    CoordinatorLayout eventsList;
+    LinearLayout noEvents;
     Item deletedItem;
+    int eventNumber = 0;
     int deletedIndex;
 
-//    CountDownTimer inActivityTimer;
-
-//    @Override
-//    public void onUserInteraction() {
-//        super.onUserInteraction();
-//        inActivityTimer.cancel();
-//        inActivityTimer.start();
-//    }
-
-
     Handler handler;
-    Runnable r;
+    Runnable refreshThread;
+
+    DBReqHandler dbReqHandler;
+    Activity mActivity;
 
     @Override
     public void onUserInteraction() {
         // TODO Auto-generated method stub
         super.onUserInteraction();
         Log.d("inactivity", "Usr interacted");
-        //Toast.makeText(MainActivity.this, "user interacted",Toast.LENGTH_SHORT).show();
         stopHandler();//stop first and then start
         startHandler();
     }
     public void stopHandler() {
-        handler.removeCallbacks(r);
+        handler.removeCallbacks(refreshThread);
     }
     public void startHandler() {
-        handler.postDelayed(r, 5*60*1000); //for 5 minutes
+        handler.postDelayed(refreshThread, 5*60*1000); //for 5 minutes
     }
 
     public void daySubscribe() {
@@ -196,35 +166,24 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
         public void OnDaySubscription()
         {
-
-//            int[] bookingsInEachRoom;
-
-
-            int t;
-
             try {
+                int t;
                 JSONObject dayResponse = new JSONObject(dayResponseString);
-//                Log.d("No.of bookings : ", "On day sub" + dayResponse.optString("Client_ID"));
-
                 if (dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("success")) {
 
                     bookings = dayResponse.getJSONObject("bookings");
-//                    Log.d("No.of bookings : ", String.valueOf(bookings.length()));
 
                     if (bookings.length() <= 0) {
                         return;
                     }
 
                     t = 0;
-//                    bookingsInEachRoom = new int[bookings.length()];
                     roomsActuallyBooked = new String[bookings.length()];
 
                     for (int k = 0; k < roomNames.length; k++) {
                         if (bookings.has(roomNames[k])) {
                             roomsBooked = bookings.getJSONArray(roomNames[k]);
-//                            Log.d("Actual rooms booked", roomNames[k]);
 
-//                            bookingsInEachRoom[t] = roomsBooked.length();
                             roomsActuallyBooked[t] = roomNames[k];
                             t++;
                         }
@@ -235,15 +194,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
                     for (int j = 0; j < bookings.length(); j++) {
                         roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
-//                        Log.d("No.of bookings : ", String.valueOf(roomsBooked.length()));
 
                         for (int i = 0; i < roomsBooked.length(); i++) {
                             JSONObject event = roomsBooked.getJSONObject(i);
-
-//                            Log.d("room", roomsActuallyBooked[j]);
-//                            Log.d("time",event.optString("ST") + " - " + event.optString("ET"));
-//                            Log.d("person", "Booked by " + event.optString("user"));
-
                             JSONObject eventEntry = new JSONObject();
                             eventEntry.put("room", "Booked at " + roomsActuallyBooked[j]);
                             eventEntry.put("time",event.optString("ST") + " - " + event.optString("ET"));
@@ -252,10 +205,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                             respArray.put(eventEntry);
 
                         }
-//                        Log.d("List",respArray.toString());
                     }
-
-//                    Log.d("List-- Final",respArray.toString());
 
                     List<Item> items = new Gson().fromJson(respArray.toString(), new TypeToken<List<Item>>() {
                     }.getType());
@@ -266,7 +216,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
                     mActivity.runOnUiThread(new Runnable() {
                         public void run() {
-//                            Log.d("======= ", "====Setting list");
                             // refreshing recycler view
                             eventsList.setVisibility(View.VISIBLE);
                             noEvents.setVisibility(View.INVISIBLE);
@@ -295,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             monthRequest.put("year", selectedYear);
             monthRequest.put("month", months[monthViewed]);
 
-//            Log.d("Month string : ", months[monthViewed]);
             dbReqHandler.dbRequest(DBReqHandler.MSG_ID_PARSE_MONTH,monthRequest.toString());
 
         } catch (JSONException e) {
@@ -308,11 +256,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     public void OnMonthSubscription(){
         try {
             JSONObject monthResponse = new JSONObject(monthResponseString);
-//            mActivity.runOnUiThread(new Runnable() {
-//                public void run() {
-//                    widget.removeDecorators();
-//                }
-//            });
             Log.d("============",monthResponseString);
             if(monthResponse.optString("msg_type").equals(monthResponseMessageType) && monthResponse.optString("result").equals("success")) {
                 daysBooked = monthResponse.optJSONArray("days");
@@ -341,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     {
         Log.d("debug","onResume" );
         super.onResume();
-        widget.setTileWidth((width)/28);
+        widget.setTileWidth((screenWidth)/28);
         monthSubscribe();
         daySubscribe();
     }
@@ -420,32 +363,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         setContentView(R.layout.activity_main);
 
         handler = new Handler();
-        r = new Runnable() {
+        refreshThread = new Runnable() {
 
             @Override
             public void run() {
                 // TODO Auto-generated method stub
-                Toast.makeText(MainActivity.this, "user is inactive from last 5 minutes",Toast.LENGTH_SHORT).show();
                 monthSubscribe();
                 daySubscribe();
                 startHandler();
             }
         };
         startHandler();
-
-
-//        inActivityTimer = new CountDownTimer(300000, 300000) {
-//            @Override
-//            public void onTick(long l) {
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                Toast.makeText(getApplicationContext(),"5 mins of inactivity", Toast.LENGTH_LONG).show();
-//            }
-//        }.start();
-
-
 
         View decorView = getWindow().getDecorView();
         final int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -456,6 +384,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
 
+        RecyclerView recyclerView;
 
         recyclerView = findViewById(R.id.recycler_view);
         eventList = new ArrayList<>();
@@ -474,12 +403,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        height = displayMetrics.heightPixels;
-        width = displayMetrics.widthPixels;
+        screenHeight = displayMetrics.heightPixels;
+        screenWidth = displayMetrics.widthPixels;
 
         widget = findViewById(R.id.calendarView);
         widget.setAllowClickDaysOutsideCurrentMonth(true);
-        widget.setTileWidth((width)/30);
+        widget.setTileWidth((screenWidth)/30);
         widget.setDynamicHeightEnabled(true);
 
         Calendar c = Calendar.getInstance();
@@ -490,12 +419,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         currentDay = c.get(Calendar.DAY_OF_MONTH);
 
         roomNames = this.getResources().getStringArray(R.array.confRooms);
-//        roomNames[0] = "Main Conference Room";
-//        roomNames[1] = "Camera Conference Room";
-//        roomNames[2] = "Product Conference Room";
-//        roomNames[3] = "Adjacent Room to MCR";
-//        roomNames[4] = "Reception Area Room";
-//        roomNames[5] = "MiscRoom";
 
         selectedMonth = currentMonth;
         monthViewed = currentMonth;
@@ -511,7 +434,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         dayRequestMessageType = "RQ_RD_DAY";
         dayResponseMessageType = "RP_RD_DAY";
 
-        previousGroup = -1;
         eventsList = findViewById(R.id.eventsList);
         noEvents = findViewById(R.id.noEvents);
         Blurry.with(MainActivity.this)
@@ -609,8 +531,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             @Override
             public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
                 monthViewed = date.getMonth() ;
-//                Log.d("Month Changed", monthViewed + " " + date.getMonth());
-
                monthSubscribe();
             }
         });
@@ -658,7 +578,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
             // remove the item from recycler view
             eventNumber = viewHolder.getAdapterPosition();
-
 
             userWidget.setText("");
             bookingIDWidget.setText("");
