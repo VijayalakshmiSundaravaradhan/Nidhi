@@ -3,6 +3,7 @@ package kiosk.android.econ.mcrbooking;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -30,6 +31,7 @@ import android.view.View;
 import com.econ.kannan.DBReqHandler;
 
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import android.widget.LinearLayout;
@@ -144,6 +146,26 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 //        inActivityTimer.cancel();
 //        inActivityTimer.start();
 //    }
+
+
+    Handler handler;
+    Runnable r;
+
+    @Override
+    public void onUserInteraction() {
+        // TODO Auto-generated method stub
+        super.onUserInteraction();
+        Log.d("inactivity", "Usr interacted");
+        //Toast.makeText(MainActivity.this, "user interacted",Toast.LENGTH_SHORT).show();
+        stopHandler();//stop first and then start
+        startHandler();
+    }
+    public void stopHandler() {
+        handler.removeCallbacks(r);
+    }
+    public void startHandler() {
+        handler.postDelayed(r, 5*60*1000); //for 5 minutes
+    }
 
     public void daySubscribe() {
 
@@ -396,7 +418,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        View decorView = getWindow().getDecorView();
+
+        handler = new Handler();
+        r = new Runnable() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                Toast.makeText(MainActivity.this, "user is inactive from last 5 minutes",Toast.LENGTH_SHORT).show();
+                monthSubscribe();
+                daySubscribe();
+                startHandler();
+            }
+        };
+        startHandler();
 
 
 //        inActivityTimer = new CountDownTimer(300000, 300000) {
@@ -410,13 +445,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 //            }
 //        }.start();
 
-        // Hide both the navigation bar and the status bar.
-        // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
-        // a general rule, you should design your app to hide the status bar whenever you
-        // hide the navigation bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+
+        View decorView = getWindow().getDecorView();
+        final int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
+
 
         recyclerView = findViewById(R.id.recycler_view);
         eventList = new ArrayList<>();
@@ -595,6 +634,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
 
         }
 
+    }
+
+    public void refresh(View v) {
+        monthSubscribe();
+        daySubscribe();
     }
 
     /**

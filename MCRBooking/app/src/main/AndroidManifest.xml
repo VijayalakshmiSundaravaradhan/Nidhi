@@ -25,6 +25,6 @@
         <activity android:name=".Main2Activity"
             android:configChanges="orientation"
             android:screenOrientation="landscape"/>
-        <uses-library android:name="com.econ.kannan.DBReqHandler" android:required="true"/>
+        <uses-library android:name="com.econ.kannan.DBReqHandler" android:required="false"/>
     </application>
 </manifest>
