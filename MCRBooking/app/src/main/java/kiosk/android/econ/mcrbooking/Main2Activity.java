@@ -156,7 +156,7 @@ public class Main2Activity extends AppCompatActivity {
         selectedSHour = startTimes[s_hours.getValue()];
         selectedSMinute = String.valueOf(s_minutes.getValue());
         //setEndTime();
-        
+
         updateHours();
         updateMinutes();
 
