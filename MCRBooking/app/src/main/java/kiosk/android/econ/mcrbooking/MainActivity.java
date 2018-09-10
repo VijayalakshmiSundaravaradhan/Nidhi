@@ -1,7 +1,12 @@
 package kiosk.android.econ.mcrbooking;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -54,10 +60,13 @@ import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
 import jp.wasabeef.blurry.Blurry;
 
+import static android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK;
+
 
 public class MainActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener{
 
 
+    private static final String TAG = "e-CR Application";
     EditText bookingIDWidget;
     EditText userWidget;
     TextView currentDateText;
@@ -122,6 +131,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
     DBReqHandler dbReqHandler;
     Activity mActivity;
 
+    public static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 11;
+    boolean storagePermissionGranted = false;
+
     @Override
     public void onUserInteraction() {
         // TODO Auto-generated method stub
@@ -161,76 +173,75 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             e.printStackTrace();
         }
 
+    }
 
-        }
+    public void OnDaySubscription()
+    {
+        try {
+            int t;
+            JSONObject dayResponse = new JSONObject(dayResponseString);
+            if (dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("success")) {
 
-        public void OnDaySubscription()
-        {
-            try {
-                int t;
-                JSONObject dayResponse = new JSONObject(dayResponseString);
-                if (dayResponse.optString("msg_type").equals(dayResponseMessageType) && dayResponse.optString("result").equals("success")) {
+                bookings = dayResponse.getJSONObject("bookings");
 
-                    bookings = dayResponse.getJSONObject("bookings");
-
-                    if (bookings.length() <= 0) {
-                        return;
-                    }
-
-                    t = 0;
-                    roomsActuallyBooked = new String[bookings.length()];
-
-                    for (int k = 0; k < roomNames.length; k++) {
-                        if (bookings.has(roomNames[k])) {
-                            roomsBooked = bookings.getJSONArray(roomNames[k]);
-
-                            roomsActuallyBooked[t] = roomNames[k];
-                            t++;
-                        }
-                    }
-
-
-                    JSONArray respArray = new JSONArray();
-
-                    for (int j = 0; j < bookings.length(); j++) {
-                        roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
-
-                        for (int i = 0; i < roomsBooked.length(); i++) {
-                            JSONObject event = roomsBooked.getJSONObject(i);
-                            JSONObject eventEntry = new JSONObject();
-                            eventEntry.put("room", "Booked at " + roomsActuallyBooked[j]);
-                            eventEntry.put("time",event.optString("ST") + " - " + event.optString("ET"));
-                            eventEntry.put("person", "Booked by " + event.optString("user"));
-
-                            respArray.put(eventEntry);
-
-                        }
-                    }
-
-                    List<Item> items = new Gson().fromJson(respArray.toString(), new TypeToken<List<Item>>() {
-                    }.getType());
-
-                    // adding items to list
-                    eventList.clear();
-                    eventList.addAll(items);
-
-                    mActivity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            // refreshing recycler view
-                            eventsList.setVisibility(View.VISIBLE);
-                            noEvents.setVisibility(View.INVISIBLE);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    });
-
+                if (bookings.length() <= 0) {
+                    return;
                 }
 
-            } catch (JSONException e)
-            {
-                e.printStackTrace();
+                t = 0;
+                roomsActuallyBooked = new String[bookings.length()];
+
+                for (int k = 0; k < roomNames.length; k++) {
+                    if (bookings.has(roomNames[k])) {
+                        roomsBooked = bookings.getJSONArray(roomNames[k]);
+
+                        roomsActuallyBooked[t] = roomNames[k];
+                        t++;
+                    }
+                }
+
+
+                JSONArray respArray = new JSONArray();
+
+                for (int j = 0; j < bookings.length(); j++) {
+                    roomsBooked = bookings.getJSONArray(roomsActuallyBooked[j]);
+
+                    for (int i = 0; i < roomsBooked.length(); i++) {
+                        JSONObject event = roomsBooked.getJSONObject(i);
+                        JSONObject eventEntry = new JSONObject();
+                        eventEntry.put("room", roomsActuallyBooked[j]);
+                        eventEntry.put("time",event.optString("ST") + " - " + event.optString("ET"));
+                        eventEntry.put("person", "Booked by " + event.optString("user"));
+
+                        respArray.put(eventEntry);
+
+                    }
+                }
+
+                List<Item> items = new Gson().fromJson(respArray.toString(), new TypeToken<List<Item>>() {
+                }.getType());
+
+                // adding items to list
+                eventList.clear();
+                eventList.addAll(items);
+
+                mActivity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        // refreshing recycler view
+                        eventsList.setVisibility(View.VISIBLE);
+                        noEvents.setVisibility(View.INVISIBLE);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+
             }
 
+        } catch (JSONException e)
+        {
+            e.printStackTrace();
         }
+
+    }
 
 
     public void monthSubscribe() {
@@ -249,7 +260,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
 
     }
 
@@ -357,10 +367,79 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
         }
     }
 
+    /**
+     * On permission change - Accept / Reject
+     * @param requestCode - User defined integer to identify a particular request
+     * @param permissions - permissions for which the results are available
+     * @param grantResults - The results for the permissions
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE:
+            {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay!
+                    storagePermissionGranted = true;
+                }
+                else {
+                    // permission denied!
+                    finish();
+                }
+                break;
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        View decorView = getWindow().getDecorView();
+        final int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+            } else {
+                // No explanation needed; request the permission
+                Log.d("Permissions", "Request for STORAGE permission");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+
+                // MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            Log.d("Permissions","Storage permission already granted");
+            storagePermissionGranted = true;
+        }
+
+//        while(!storagePermissionGranted)
+//        {
+//
+//        }
+
+        //Starting the MQTT service
+        Log.d(TAG,  "Starting MQTT service.......");
+        Intent service = new Intent(this.getApplicationContext(), MQTTService.class);
+        startService(service);
 
         handler = new Handler();
         refreshThread = new Runnable() {
@@ -374,15 +453,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerItemTouch
             }
         };
         startHandler();
-
-        View decorView = getWindow().getDecorView();
-        final int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
 
         RecyclerView recyclerView;
 

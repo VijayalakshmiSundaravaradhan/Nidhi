@@ -38,6 +38,11 @@ android {
     }
 
     buildToolsVersion '27.0.3'
+
+    packagingOptions {
+//        pickFirst  'META-INF/*'
+        exclude 'META-INF/*'
+    }
 }
 
 dependencies {
@@ -48,7 +53,9 @@ dependencies {
     // volley http library
     implementation 'com.android.volley:volley:1.0.0'
     implementation 'com.google.code.gson:gson:2.8.0'
-    //implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    compileOnly files('libs/myjsondblibrary.jar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.prolificinteractive:material-calendarview:1.4.3'
@@ -56,7 +63,14 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compileOnly files('libs/myjsondblibrary.jar')
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'jp.wasabeef:blurry:2.1.1'
+
+    implementation 'io.moquette:moquette-netty-parser:0.8.1'
+    implementation 'io.moquette:moquette-broker:0.8.1'
+    implementation 'io.moquette:moquette-parser-commons:0.8.1'
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
+    implementation('org.eclipse.paho:org.eclipse.paho.android.service:1.0.2') {
+        exclude module: 'support-v4'
+    }
 }
